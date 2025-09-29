@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<div class="container mt-5" style="max-width: 450px;">
+    <div class="card shadow p-4">
+        <h3 class="mb-4 text-center">Citizen Login</h3>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="Email" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="Password" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        }
+
+        <div class="text-center mt-3">
+            Don't have an account? <a href="@Url.Action("Register", "Account")">Register</a>
+        </div>
+        <div class="text-center mt-3">
+            <a class="forgot-password" href="#">Forgot Password?</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "Apply for Permit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card p-4 shadow-sm">
+        <h3 class="mb-4">Apply for New Permit</h3>
+
+        <form method="post" enctype="multipart/form-data" action="@Url.Action("SubmitApplication", "Citizen")">
+
+            <!-- Personal Info Section -->
+            <h5 class="mb-3">Applicant Details</h5>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="FullName" class="form-label">Full Name</label>
+                    <input type="text" id="FullName" name="FullName" class="form-control" placeholder="Enter your name" required />
+                </div>
+                <div class="col-md-6">
+                    <label for="Email" class="form-label">Email</label>
+                    <input type="email" id="Email" name="Email" class="form-control" placeholder="Enter your email" required />
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="Phone" class="form-label">Phone Number</label>
+                    <input type="text" id="Phone" name="Phone" class="form-control" placeholder="Enter phone number" required />
+                </div>
+                <div class="col-md-6">
+                    <label for="Address" class="form-label">Address</label>
+                    <input type="text" id="Address" name="Address" class="form-control" placeholder="Enter your address" required />
+                </div>
+            </div>
+
+            <hr />
+
+            <!-- Permit Details Section -->
+            <h5 class="mb-3">Permit Details</h5>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="PermitType" class="form-label">Permit Type</label>
+                    <select id="PermitType" name="PermitType" class="form-select" required>
+                        <option value="">Select Type</option>
+                        <option>Building Permit</option>
+                        <option>Trade License</option>
+                        <option>Event Permit</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="ProjectLocation" class="form-label">Project Location</label>
+                    <input type="text" id="ProjectLocation" name="ProjectLocation" class="form-control" placeholder="Enter project address" required />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="Description" class="form-label">Project Description</label>
+                <textarea id="Description" name="Description" class="form-control" rows="4" placeholder="Provide a brief description of your project" required></textarea>
+            </div>
+
+            <hr />
+
+            <!-- Document Upload -->
+            <h5 class="mb-3">Upload Required Documents</h5>
+            <div class="mb-3">
+                <label for="Documents" class="form-label">Attach Files (PDF, JPG, PNG)</label>
+                <input type="file" id="Documents" name="Documents" class="form-control" multiple />
+                <div class="form-text">You can upload multiple documents (Max 5MB each).</div>
+            </div>
+
+            <hr />
+
+            <!-- Submission -->
+            <div class="d-flex justify-content-between">
+                <button type="reset" class="btn btn-secondary">Clear Form</button>
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+            </div>
+        </form>
+    </div>
+</div>

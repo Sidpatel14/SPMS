@@ -1,0 +1,98 @@
+﻿@{
+    ViewBag.Title = "My Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>My Applications</h3>
+        <a href="@Url.Action("Apply", "Citizen")" class="btn btn-primary">+ Apply for New Permit</a>
+    </div>
+
+    <!-- Filter/Search Bar -->
+    <div class="card p-3 shadow-sm mb-4">
+        <form method="get" action="@Url.Action("MyApplications", "Citizen")" class="row g-3">
+            <div class="col-md-3">
+                <label for="Search" class="form-label">Search by ID or Type</label>
+                <input type="text" class="form-control" id="Search" name="search" placeholder="e.g. APP-001 or Trade" />
+            </div>
+            <div class="col-md-3">
+                <label for="Status" class="form-label">Status</label>
+                <select class="form-select" id="Status" name="status">
+                    <option value="">All</option>
+                    <option>Pending</option>
+                    <option>Approved</option>
+                    <option>Rejected</option>
+                    <option>Draft</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="FromDate" class="form-label">From Date</label>
+                <input type="date" class="form-control" id="FromDate" name="fromDate" />
+            </div>
+            <div class="col-md-3">
+                <label for="ToDate" class="form-label">To Date</label>
+                <input type="date" class="form-control" id="ToDate" name="toDate" />
+            </div>
+
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="@Url.Action("MyApplications", "Citizen")" class="btn btn-secondary ms-2">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Your Submitted Applications</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Application ID</th>
+                        <th>Permit Type</th>
+                        <th>Status</th>
+                        <th>Submitted On</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#APP-001</td>
+                        <td>Building Permit</td>
+                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td>2025-09-20</td>
+                        <td>2025-09-25</td>
+                        <td>
+                            <a href="@Url.Action("Details", "Citizen", new { id = 1 })" class="btn btn-sm btn-primary">View</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger">Cancel</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>#APP-002</td>
+                        <td>Event Permit</td>
+                        <td><span class="badge bg-success">Approved</span></td>
+                        <td>2025-09-10</td>
+                        <td>2025-09-18</td>
+                        <td>
+                            <a href="@Url.Action("Details", "Citizen", new { id = 2 })" class="btn btn-sm btn-primary">View</a>
+                            <a href="#" class="btn btn-sm btn-outline-success">Download</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>#APP-003</td>
+                        <td>Trade License</td>
+                        <td><span class="badge bg-danger">Rejected</span></td>
+                        <td>2025-09-05</td>
+                        <td>2025-09-12</td>
+                        <td>
+                            <a href="@Url.Action("Details", "Citizen", new { id = 3 })" class="btn btn-sm btn-primary">View</a>
+                            <a href="#" class="btn btn-sm btn-outline-warning">Resubmit</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

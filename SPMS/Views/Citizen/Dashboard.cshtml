@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-light">
+            <h5>Total Applications</h5>
+            <h2>12</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-warning text-white">
+            <h5>Pending</h5>
+            <h2>4</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-success text-white">
+            <h5>Approved</h5>
+            <h2>6</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-danger text-white">
+            <h5>Rejected</h5>
+            <h2>2</h2>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4">
+    <h5 class="mb-3">Recent Applications</h5>
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Permit Type</th>
+                <th>Status</th>
+                <th>Submitted On</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>#APP-001</td>
+                <td>Building Permit</td>
+                <td><span class="badge bg-warning">Pending</span></td>
+                <td>2025-09-25</td>
+                <td><a href="#" class="btn btn-sm btn-primary">View</a></td>
+            </tr>
+            <tr>
+                <td>#APP-002</td>
+                <td>Event Permit</td>
+                <td><span class="badge bg-success">Approved</span></td>
+                <td>2025-09-20</td>
+                <td><a href="#" class="btn btn-sm btn-primary">View</a></td>
+            </tr>
+            <tr>
+                <td>#APP-003</td>
+                <td>Trade License</td>
+                <td><span class="badge bg-danger">Rejected</span></td>
+                <td>2025-09-18</td>
+                <td><a href="#" class="btn btn-sm btn-primary">View</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

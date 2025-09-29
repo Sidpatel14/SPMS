@@ -35,7 +35,7 @@ public partial class User
 
     public DateTime? ModifiedAt { get; set; }
 
-    public string Ipaddress { get; set; } = null!;
+    public string? Ipaddress { get; set; }
 
     public DateTime? LastLogin { get; set; }
 
