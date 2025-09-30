@@ -2,60 +2,179 @@
     ViewBag.Title = "Apply for Permit";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<style>
+    /* Container */
+    .container {
+        max-width: 700px;
+        margin: 50px auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
+    /* Card */
+    .card {
+        background: linear-gradient(145deg, #ffffff, #f7f9fc);
+        border-radius: 15px;
+        padding: 40px 35px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Heading */
+        .card h3 {
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        /* Labels */
+        .card label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+            color: #555;
+        }
+
+    /* Input wrapper for icons */
+    .input-icon {
+        position: relative;
+    }
+
+        .input-icon input,
+        .input-icon select {
+            padding-left: 40px;
+        }
+
+        /* Icons inside inputs */
+        .input-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+    /* Inputs */
+    .card input,
+    .card select {
+        height: 45px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 0 15px;
+        width: 100%;
+        transition: all 0.3s ease;
+        background-color: #fefefe;
+    }
+
+        .card input:focus,
+        .card select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+            outline: none;
+        }
+
+    /* Submit Button */
+    /* .card button {
+        background: linear-gradient(to right, #007bff, #0056b3);
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 12px 0;
+        border-radius: 10px;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+    }
+
+        .card button:hover {
+            background: linear-gradient(to right, #0056b3, #003f7f);
+            transform: translateY(-2px);
+        }
+ */
+    /* Error Alert */
+    .alert {
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    /* Links */
+    .card .text-center a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .card .text-center a:hover {
+            text-decoration: underline;
+        }
+
+    /* Responsive adjustments */
+
+</style>
 <div class="container mt-4">
     <div class="card p-4 shadow-sm">
         <h3 class="mb-4">Apply for New Permit</h3>
 
-        <form method="post" enctype="multipart/form-data" action="@Url.Action("SubmitApplication", "Citizen")">
-
-            <!-- Personal Info Section -->
-            <h5 class="mb-3">Applicant Details</h5>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="FullName" class="form-label">Full Name</label>
-                    <input type="text" id="FullName" name="FullName" class="form-control" placeholder="Enter your name" required />
-                </div>
-                <div class="col-md-6">
-                    <label for="Email" class="form-label">Email</label>
-                    <input type="email" id="Email" name="Email" class="form-control" placeholder="Enter your email" required />
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <label for="Phone" class="form-label">Phone Number</label>
-                    <input type="text" id="Phone" name="Phone" class="form-control" placeholder="Enter phone number" required />
-                </div>
-                <div class="col-md-6">
-                    <label for="Address" class="form-label">Address</label>
-                    <input type="text" id="Address" name="Address" class="form-control" placeholder="Enter your address" required />
-                </div>
-            </div>
-
-            <hr />
+        <form method="post" enctype="multipart/form-data" action="@Url.Action("Apply", "Citizen")">
 
             <!-- Permit Details Section -->
             <h5 class="mb-3">Permit Details</h5>
             <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-5 mb-3">
                     <label for="PermitType" class="form-label">Permit Type</label>
                     <select id="PermitType" name="PermitType" class="form-select" required>
                         <option value="">Select Type</option>
                         <option>Building Permit</option>
                         <option>Trade License</option>
                         <option>Event Permit</option>
+                        <option>Health & Safety</option>
+                        <option>Environmental</option>
+                        <option>Parking</option>
+                        <option>Temporary Work</option>
                     </select>
                 </div>
-                <div class="col-md-6">
-                    <label for="ProjectLocation" class="form-label">Project Location</label>
-                    <input type="text" id="ProjectLocation" name="ProjectLocation" class="form-control" placeholder="Enter project address" required />
+        
+                <h6 class="mb-3">Project Location</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="Address1" class="form-label">Address 1</label>
+                        <input type="text" id="Address1" name="Address1" class="form-control" placeholder="Enter Project Address 1" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="Address2" class="form-label">Address 2</label>
+                        <input type="text" id="Address2" name="Address2" class="form-control" placeholder="Enter Project Address 2" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="Town" class="form-label">Town</label>
+                        <input type="text" id="Town" name="Town" class="form-control" placeholder="Enter Project Town" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label for="Country" class="form-label">Country</label>
+                        <input type="text" id="Country" name="Country" class="form-control" placeholder="Enter Project Country" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label for="State" class="form-label">State</label>
+                        <input type="text" id="State" name="State" class="form-control" placeholder="Enter Project State" required />
+                    </div>
                 </div>
             </div>
-
+            
             <div class="mb-3">
-                <label for="Description" class="form-label">Project Description</label>
-                <textarea id="Description" name="Description" class="form-control" rows="4" placeholder="Provide a brief description of your project" required></textarea>
+                <label for="Comments" class="form-label">Project Description</label>
+                <textarea id="Comments" name="Comments" class="form-control" rows="4" placeholder="Provide a brief description of your project" required></textarea>
             </div>
 
             <hr />
@@ -63,8 +182,8 @@
             <!-- Document Upload -->
             <h5 class="mb-3">Upload Required Documents</h5>
             <div class="mb-3">
-                <label for="Documents" class="form-label">Attach Files (PDF, JPG, PNG)</label>
-                <input type="file" id="Documents" name="Documents" class="form-control" multiple />
+                <label for="doc" class="form-label">Attach Files (PDF, JPG, PNG)</label>
+                <input type="file" id="doc" name="doc" class="form-control" multiple />
                 <div class="form-text">You can upload multiple documents (Max 5MB each).</div>
             </div>
 

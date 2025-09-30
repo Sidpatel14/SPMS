@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
+using System.ComponentModel.DataAnnotations;
 
-namespace SPMS.Models;
-
-public partial class Application
+public class ApplicationViewModel
 {
     public int ApplicationId { get; set; }
 
@@ -30,5 +28,6 @@ public partial class Application
     public string State { get; set; } = null!;
 
     public string Country { get; set; } = null!;
-    public List<Document> doc { get; set; } = new();
+    // Use IFormFile for single or multiple uploads
+    public List<IFormFile>? doc { get; set; }
 }

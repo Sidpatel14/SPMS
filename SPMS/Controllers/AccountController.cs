@@ -1,17 +1,17 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 //using System.Web.Mvc;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SPMS.Models;
 
 namespace SPMS.Controllers
 {
     public class AccountController : Controller
     {
-        //private SmartPermitDbContext _db = new SmartPermitDbContext();
-
 
         private readonly MyDbContext _db;
         public AccountController(MyDbContext context)
@@ -36,30 +36,45 @@ namespace SPMS.Controllers
             return View();
         }
 
-        // POST: /Account/Register
+        
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Register(string FullName, string Email, string Password)
+        public IActionResult Register(User model)
         {
-            if (_db.Users.Any(u => u.Email == Email))
+            model.Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+            string connectionString = _db.Database.GetDbConnection().ConnectionString;
+            if (ModelState.IsValid)
             {
-                ViewBag.Error = "Email already exists.";
-                return View();
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                    string hashedPassword = HashPassword(model.Password);
+
+                    SqlCommand cmd = new SqlCommand(@"INSERT INTO Users 
+                (Title, FirstName, LastName, Email, Password, Role, Phone, Address1, Address2, Town, State, Country, CreatedAt) 
+                VALUES 
+                (@Title, @FirstName, @LastName, @Email, @Password, 'Citizen', @Phone, @Address1, @Address2, @Town, @State, @Country, GETDATE())", con);
+
+                    cmd.Parameters.AddWithValue("@Title", model.Title);
+                    cmd.Parameters.AddWithValue("@FirstName", model.FirstName);
+                    cmd.Parameters.AddWithValue("@LastName", model.LastName);
+                    cmd.Parameters.AddWithValue("@Email", model.Email);
+                    cmd.Parameters.AddWithValue("@Password", hashedPassword);
+                    cmd.Parameters.AddWithValue("@Phone", model.Phone ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Address1", model.Address1);
+                    cmd.Parameters.AddWithValue("@Address2", model.Address2 ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Town", model.Town ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@State", model.State);
+                    cmd.Parameters.AddWithValue("@Country", model.Country);
+                    cmd.Parameters.AddWithValue("@IPAddress", HttpContext.Connection.RemoteIpAddress?.ToString());
+                    cmd.ExecuteNonQuery();
+                }
+
+                return RedirectToAction("Login");
             }
 
-            var user = new User
-            {
-                FirstName = FullName,
-                Email = Email,
-                Password = HashPassword(Password),
-                Role = "Citizen",
-                CreatedAt = DateTime.Now
-            };
-
-            _db.Users.Add(user);
-            _db.SaveChanges();
-
-            return RedirectToAction("Login");
+            return View(model);
         }
 
         // GET: /Account/Login
@@ -74,6 +89,7 @@ namespace SPMS.Controllers
         public ActionResult Login(string Email, string Password)
         {
             var hash = HashPassword(Password);
+            //hash = BCrypt.Net.BCrypt.HashPassword(Password);
             var user = _db.Users.FirstOrDefault(u => u.Email == Email && u.Password == hash);
 
             if (user == null)
@@ -81,20 +97,26 @@ namespace SPMS.Controllers
                 ViewBag.Error = "Invalid email or password.";
                 return View();
             }
-
+            if (user != null)
+            {
+                HttpContext.Session.SetString("UserID", user.UserId.ToString());
+                HttpContext.Session.SetString("FullName", user.FirstName);
+                return RedirectToAction("Dashboard", "Citizen");
+            }
             //Session["UserID"] = user.UserId;
-           // Session["FullName"] = user.FirstName;
-           // Session["Role"] = user.Role;
+            // Session["FullName"] = user.FirstName;
+            // Session["Role"] = user.Role;
 
             return RedirectToAction("Dashboard", "Citizen");
         }
-
         // Logout
         public ActionResult Logout()
         {
-            //Session.Clear();
+            HttpContext.Session.Clear(); // Clear all session data
             return RedirectToAction("Login");
         }
+
+       
     }
 }
 
