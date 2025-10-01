@@ -1,0 +1,39 @@
+﻿@model List<AdminUserRow>
+@{
+    ViewBag.Title = "Manage Users";
+}
+
+<div class="container mt-4">
+    <h2>Manage Users</h2>
+    <div class="card p-3 mb-3">
+        <form method="get" class="row g-2">
+           
+            <div class="col-md-2"> <a href="@Url.Action("CreateStaff", "Admin")" class="btn btn-primary">+ Add Staff</a></div>
+        </form>
+    </div>
+    <div class="card p-3 mb-3">
+        <table class="table table-hover">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th>Created</th><th>Action</th></tr></thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@u.UserID</td>
+                        <td>@u.FullName</td>
+                        <td>@u.Email</td>
+                        <td>@u.Role</td>
+                        <td>@(u.IsActive ? "Yes" : "No")</td>
+                        <td>@u.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <form method="post" asp-action="ToggleUserActive" style="display:inline">
+                                <input type="hidden" name="id" value="@u.UserID" />
+                                <input type="hidden" name="active" value="@(u.IsActive ? "false" : "true")" />
+                                <button class="btn btn-sm @(u.IsActive ? "btn-warning" : "btn-success")">@((u.IsActive) ? "Deactivate" : "Activate")</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

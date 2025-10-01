@@ -30,4 +30,5 @@ public class ApplicationViewModel
     public string Country { get; set; } = null!;
     // Use IFormFile for single or multiple uploads
     public List<IFormFile>? doc { get; set; }
+    public string? CitizenName { get; set; }
 }

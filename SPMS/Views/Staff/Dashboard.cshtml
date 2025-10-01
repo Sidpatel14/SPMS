@@ -1,0 +1,67 @@
+﻿@model StaffViewModel
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-light">
+            <h6>Total Applications</h6>
+            <h3>@Model.TotalApplications</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-warning text-white">
+            <h6>Submitted</h6>
+            <h3>@Model.Submitted</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-success text-white">
+            <h6>Under Review</h6>
+            <h3>@Model.UnderReview</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3 bg-danger text-white">
+            <h6>Approved</h6>
+            <h3>@Model.Approved</h3>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <h2>Pending Applications</h2>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Citizen Name</th>
+                <th>Permit Type</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var app in Model.LatestApplications)
+            {
+                <tr>
+                    <td>@app.ApplicationID</td>
+                    <td>@app.CitizenName</td>
+                    <td>@app.PermitType</td>
+                    <td>@app.Status</td>
+                    <td>@app.SubmissionDate</td>
+                    <td>@app.State, @app.Country</td>
+                    <td>
+                        <a class="btn btn-sm btn-primary" href="/Staff/Details/@app.ApplicationID">Review</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+

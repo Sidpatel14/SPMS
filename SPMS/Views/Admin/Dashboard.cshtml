@@ -1,0 +1,58 @@
+﻿@model AdminDashboardViewModel
+@{
+    ViewBag.Title = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 bg-light">
+                <h6>Total Applications</h6>
+                <h3>@Model.TotalApplications</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 bg-warning text-white">
+                <h6>Submitted</h6>
+                <h3>@Model.Submitted</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 bg-success text-white">
+                <h6>Under Review</h6>
+                <h3>@Model.UnderReview</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 bg-danger text-white">
+                <h6>Approved</h6>
+                <h3>@Model.Approved</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-3">
+        <h5>Latest Applications</h5>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Citizen</th><th>Type</th><th>Status</th><th>Submitted</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.LatestApplications)
+                {
+                    <tr>
+                        <td>@a.ApplicationID</td>
+                        <td>@a.CitizenName</td>
+                        <td>@a.PermitType</td>
+                        <td>@a.Status</td>
+                        <td>@a.SubmissionDate.ToString("yyyy-MM-dd")</td>
+                        <td><a class="btn btn-sm btn-primary" href="@Url.Action("ApplicationDetails", "Admin", new { id = a.ApplicationID })">View</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

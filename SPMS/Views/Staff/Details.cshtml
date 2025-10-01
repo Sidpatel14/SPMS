@@ -1,0 +1,36 @@
+﻿@model ApplicationViewModel
+
+<div class="container mt-4">
+    <h2>Application Details</h2>
+
+    <div class="card p-3 mb-3">
+        <h4>@Model.PermitType</h4>
+        <p><strong>Citizen:</strong> @Model.CitizenName</p>
+        <p><strong>Address:</strong> @Model.Address1, @Model.State, @Model.Country</p>
+        <p><strong>Status:</strong> @Model.Status</p>
+        <p><strong>Comments:</strong> @Model.Comments</p>
+    </div>
+
+    <form method="post" asp-action="UpdateStatus">
+        <input type="hidden" name="applicationId" value="@Model.ApplicationId" />
+
+        <div class="form-group mb-3">
+            <label>Update Status</label>
+            <select name="status" class="form-control" required>
+                <option value="">--Select--</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Approved">Approve</option>
+                <option value="Rejected">Reject</option>
+                <option value="MoreInfoRequired">Request More Info</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Comments (optional)</label>
+            <textarea name="comments" class="form-control" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success">Submit</button>
+        <a href="/Staff/Dashboard" class="btn btn-secondary">Back</a>
+    </form>
+</div>

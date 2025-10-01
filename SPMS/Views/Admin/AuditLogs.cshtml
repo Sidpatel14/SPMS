@@ -1,0 +1,25 @@
+﻿@model List<AuditLogRow>
+@{
+    ViewBag.Title = "Audit Logs";
+}
+
+<div class="container mt-4">
+    <h2>Audit Logs</h2>
+
+    <div class="card p-3">
+        <table class="table table-sm">
+            <thead><tr><th>When</th><th>Action</th><th>App ID</th><th>User</th></tr></thead>
+            <tbody>
+                @foreach (var l in Model)
+                {
+                    <tr>
+                        <td>@l.PerformedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@l.Action</td>
+                        <td>@(l.ApplicationID == 0 ? "-" : l.ApplicationID.ToString())</td>
+                        <td>@l.PerformedBy</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

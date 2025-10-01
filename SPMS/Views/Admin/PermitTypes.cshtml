@@ -1,0 +1,38 @@
+﻿@model List<PermitTypeRow>
+@{
+    ViewBag.Title = "Permit Types";
+}
+
+<div class="container mt-4">
+    <h2>Permit Types</h2>
+
+    <div class="card p-3 mb-3">
+        <form method="post" asp-action="AddPermitType" class="row g-2">
+            <div class="col-md-4"><input name="typeName" class="form-control" placeholder="Type name" required /></div>
+            <div class="col-md-5"><input name="description" class="form-control" placeholder="Description (optional)" /></div>
+            <div class="col-md-3"><button class="btn btn-primary">Add</button></div>
+        </form>
+    </div>
+
+    <div class="card p-3">
+        <table class="table">
+            <thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Action</th></tr></thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@p.PermitTypeID</td>
+                        <td>@p.TypeName</td>
+                        <td>@p.Description</td>
+                        <td>
+                            <form method="post" asp-action="DeletePermitType" onsubmit="return confirm('Delete this permit type?');">
+                                <input type="hidden" name="id" value="@p.PermitTypeID" />
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
+﻿using Microsoft.AspNetCore.Http;
 //using System.Web.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SPMS.Models;
+using System;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SPMS.Controllers
 {
@@ -101,11 +102,17 @@ namespace SPMS.Controllers
             {
                 HttpContext.Session.SetString("UserID", user.UserId.ToString());
                 HttpContext.Session.SetString("FullName", user.FirstName);
-                return RedirectToAction("Dashboard", "Citizen");
+                HttpContext.Session.SetString("Role", user.Role);
+
+                var role = user.Role.ToString();
+                if (role == "Citizen")
+                    return RedirectToAction("Dashboard", "Citizen");
+                else if (role == "Staff")
+                    return RedirectToAction("Dashboard", "Staff");
+                else if (role == "Admin")
+                    return RedirectToAction("Dashboard", "Admin");
             }
-            //Session["UserID"] = user.UserId;
-            // Session["FullName"] = user.FirstName;
-            // Session["Role"] = user.Role;
+
 
             return RedirectToAction("Dashboard", "Citizen");
         }

@@ -1,0 +1,232 @@
+﻿@{
+    ViewBag.Title = "Add Staff";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">@ViewBag.Message</div>
+}
+
+
+<style>
+    /* Container */
+    .container {
+        max-width: 700px;
+        margin: 50px auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Card */
+    .card {
+        background: linear-gradient(145deg, #ffffff, #f7f9fc);
+        border-radius: 15px;
+        padding: 40px 35px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Heading */
+        .card h3 {
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        /* Labels */
+        .card label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+            color: #555;
+        }
+
+    /* Input wrapper for icons */
+    .input-icon {
+        position: relative;
+    }
+
+        .input-icon input,
+        .input-icon select {
+            padding-left: 40px;
+        }
+
+        /* Icons inside inputs */
+        .input-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+    /* Inputs */
+    .card input,
+    .card select {
+        height: 45px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 0 15px;
+        width: 100%;
+        transition: all 0.3s ease;
+        background-color: #fefefe;
+    }
+
+        .card input:focus,
+        .card select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+            outline: none;
+        }
+
+    /* Submit Button */
+    .card button {
+        background: linear-gradient(to right, #007bff, #0056b3);
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 12px 0;
+        border-radius: 10px;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+    }
+
+        .card button:hover {
+            background: linear-gradient(to right, #0056b3, #003f7f);
+            transform: translateY(-2px);
+        }
+
+    /* Error Alert */
+    .alert {
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    /* Links */
+    .card .text-center a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .card .text-center a:hover {
+            text-decoration: underline;
+        }
+
+    /* Responsive adjustments */
+
+</style>
+
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h3 class="mb-4 text-center">Add Staff</h3>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @using (Html.BeginForm("CreateStaff", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="row mb-3">
+                    <div class="col-md-2 input-icon">
+                        <label>Title</label>
+                        <select name="Title" class="form-control" required>
+                            <option value="Mr">Mr</option>
+                            <option value="Mrs">Mrs</option>
+                            <option value="Miss">Miss</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 input-icon">
+                        <label>First Name</label>
+                        <input type="text" name="FirstName" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-4 input-icon">
+                        <label>Last Name</label>
+                        <input type="text" name="LastName" class="form-control" required />
+                    </div>
+                    <div class="col-md-2 input-icon ">
+                        <label>Role</label>
+                        <select type="text" name="role" class="form-control" required>
+                            <option>Citizen</option>
+                            <option>Staff</option>
+                            <option>Admin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6 input-icon">
+                        <label>Email</label>
+                        <input type="email" name="Email" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 input-icon">
+                        <label>Password</label>
+                        <input type="password" name="Password" class="form-control" required />
+                    </div>
+
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6 input-icon">
+                        <label>Phone</label>
+                        <input type="text" name="Phone" class="form-control" />
+                    </div>
+
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 input-icon">
+                        <label>Address 1</label>
+                        <input type="text" name="Address1" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 input-icon">
+                        <label>Address 2</label>
+                        <input type="text" name="Address2" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 input-icon ">
+                        <label>Town</label>
+                        <input type="text" name="Town" class="form-control" />
+                    </div>
+                    <div class="col-md-4 input-icon">
+                        <label>Country</label>
+                        <input type="text" name="Country" class="form-control" />
+                        @* <select id="Country" name="Country" class="form-control" required>
+                    <option value="">--Select Country--</option>
+                </select> *@
+                    </div>
+
+                    <div class="col-md-4 input-icon">
+                        <label>State</label>
+                        <input type="text" name="State" class="form-control" />
+                        @*  <select id="State" name="State" class="form-control" required>
+                    <option value="">--Select State--</option>
+                </select> *@
+                    </div>
+                </div>
+
+
+
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+        }
+       
+    </div>
+</div>
