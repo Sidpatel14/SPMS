@@ -4,35 +4,152 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="row mb-3">
-    <div class="col-md-3">
-        <div class="card stat-card text-center p-3 bg-light">
-            <h6>Total Applications</h6>
-            <h3>@Model.TotalApplications</h3>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: #333;
+    }
+
+    /* Dashboard container */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .col-md-2 {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    /* Card styles */
+    .card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+    .card-body {
+        padding: 30px 20px;
+    }
+
+        .card-body h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            margin-bottom: 8px;
+        }
+
+        .card-body p {
+            font-size: 16px;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+    /* Color tweaks for better contrast */
+    .bg-primary {
+        background: #007bff;
+    }
+
+    .bg-warning {
+        background: #ff9800;
+    }
+
+    .bg-info {
+        background: #17a2b8;
+    }
+
+    .bg-success {
+        background: #28a745;
+    }
+
+    .bg-danger {
+        background: #dc3545;
+    }
+
+    .text-white {
+        color: #fff;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .row
+
+    {
+        flex-direction: column;
+    }
+
+    .col-md-2 {
+        min-width: 100%;
+    }
+
+    }
+</style>
+
+
+<h2>Welcome, @Context.Session.GetString("FullName")</h2>
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="card text-center bg-primary text-white">
+            <div class="card-body">
+                <h3>@Model.TotalApplications</h3>
+                <p>Total Applications</p>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card text-center p-3 bg-warning text-white">
-            <h6>Submitted</h6>
-            <h3>@Model.Submitted</h3>
+    <div class="col-md-2">
+        <div class="card text-center bg-warning text-white">
+            <div class="card-body">
+                <h3>@Model.Submitted</h3>
+                <p>Pending Applications</p>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card text-center p-3 bg-success text-white">
-            <h6>Under Review</h6>
-            <h3>@Model.UnderReview</h3>
+    <div class="col-md-2">
+        <div class="card text-center bg-info text-white">
+            <div class="card-body">
+                <h3>@Model.UnderReview</h3>
+                <p>Under Review</p>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card text-center p-3 bg-danger text-white">
-            <h6>Approved</h6>
-            <h3>@Model.Approved</h3>
+    <div class="col-md-2">
+        <div class="card text-center bg-success text-white">
+            <div class="card-body">
+                <h3>@Model.Approved</h3>
+                <p>Approved</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-danger text-white">
+            <div class="card-body">
+                <h3>@Model.Rejected</h3>
+                <p>Rejected</p>
+            </div>
         </div>
     </div>
 </div>
-
 <div class="container mt-4">
-    <h2>Pending Applications</h2>
+    <h2>Latest Applications</h2>
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
@@ -63,5 +180,3 @@
         </tbody>
     </table>
 </div>
-
-
