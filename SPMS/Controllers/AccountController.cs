@@ -220,6 +220,82 @@ namespace SPMS.Controllers
             }
         }
 
+        // =========== Forget Password =============
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ForgotPassword(string email)
+        {
+            var user = _db.Users.FirstOrDefault(u => u.Email == email);
+            if (user != null)
+            {
+                // generate token
+                //user.PasswordResetToken = Guid.NewGuid().ToString();
+                //user.TokenExpiry = DateTime.UtcNow.AddHours(1);
+                _db.SaveChanges();
+
+                // TODO: Send email with link like /Account/ResetPassword?token=xxx
+                ViewBag.Message = "If this email is registered, a reset link has been sent.";
+            }
+            else
+            {
+                ViewBag.Message = "If this email is registered, a reset link has been sent.";
+            }
+            return View();
+        }
+
+        // ===========================
+        // Profile Page
+        // ===========================
+        [HttpGet]
+        public IActionResult Profile()
+        {
+            // Get the string value from session
+            string? userIdString = HttpContext.Session.GetString("UserID");
+
+            // Convert to integer if needed
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdString))
+            {
+                userId = int.Parse(userIdString);
+            }
+            var user = _db.Users.FirstOrDefault(u => u.UserId == userId);
+            if (user == null) return RedirectToAction("Login");
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateProfile(User model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Error = "Invalid input";
+                return View("Profile", model);
+            }
+
+            var user = _db.Users.FirstOrDefault(u => u.UserId == model.UserId);
+            if (user == null)
+            {
+                ViewBag.Error = "User not found";
+                return View("Profile", model);
+            }
+
+            // Update fields
+            user.Title = model.Title;
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.Phone = model.Phone;
+            user.Address1 = model.Address1;
+            user.Address2 = model.Address2;
+            user.Town = model.Town;
+            user.State = model.State;
+            user.Country = model.Country;
+
+            _db.SaveChanges();
+            ViewBag.Message = "Profile updated successfully";
+            return View("Profile", user);
+        }
 
     }
 }

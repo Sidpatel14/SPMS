@@ -1,0 +1,296 @@
+﻿@model SPMS.Models.User
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2); /* modern gradient */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Centered login card */
+    .login-card, .register-card {
+        width: 100%;
+        max-width: 700px;
+        padding: 40px 35px;
+        border-radius: 15px;
+        background: #fff;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .login-card:hover, .register-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+        }
+
+        /* Heading */
+        .login-card h2, .register-card h2 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+    /* Floating labels */
+    .form-group {
+        position: relative;
+        margin-bottom: 25px;
+    }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            background: #fefefe;
+        }
+
+            .form-group input:focus, .form-group select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+                outline: none;
+            }
+
+        .form-group label {
+            position: absolute;
+            top: 12px;
+            left: 15px;
+            color: #aaa;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label,
+        .form-group select:focus + label,
+        .form-group select:not([value=""]) + label {
+            top: -10px;
+            left: 12px;
+            font-size: 12px;
+            color: #667eea;
+            background: #fff;
+            padding: 0 4px;
+        }
+
+    /* Submit button */
+    .login-card button, .register-card button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .login-card button:hover, .register-card button:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+        }
+
+    /* Links */
+    .login-card .text-center, .register-card .text-center {
+        margin-top: 20px;
+    }
+
+        .login-card .text-center a, .register-card .text-center a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .login-card .text-center a:hover, .register-card .text-center a:hover {
+                text-decoration: underline;
+            }
+
+    /* Alert */
+    .alert {
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        background: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .login-card, .register-card {
+            padding: 30px 20px;
+        }
+    }
+</style>
+<div class="register-card">
+    <h2>User Profile</h2>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-success">@ViewBag.Message</div>
+    }
+    else if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    @using (Html.BeginForm("UpdateProfile", "Account", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-2 form-group">
+                <select name="Title" class="form-control" required>
+                    <option value="">Title</option>
+                    <option value="Mr" selected="@(Model != null && Model.Title == "Mr" ? "selected" : null)">Mr</option>
+                    <option value="Mrs" selected="@(Model != null && Model.Title == "Mrs" ? "selected" : null)">Mrs</option>
+                    <option value="Miss" selected="@(Model != null && Model.Title == "Miss" ? "selected" : null)">Miss</option>
+                </select>
+                <label>Title</label>
+            </div>
+            <div class="col-md-5 form-group">
+                <input type="text" name="FirstName" value="@Model.FirstName" required placeholder=" " />
+                <label>First Name</label>
+            </div>
+            <div class="col-md-5 form-group">
+                <input type="text" name="LastName" value="@Model.LastName" required placeholder=" " />
+                <label>Last Name</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <input type="email" name="Email" value="@Model.Email" required placeholder=" " />
+                <label>Email</label>
+            </div>
+            <div class="col-md-6 form-group">
+                <input type="text" name="Phone" value="@Model.Phone" placeholder=" " />
+                <label>Phone</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <input type="text" name="Address1" value="@Model.Address1" required placeholder=" " />
+                <label>Address 1</label>
+            </div>
+            <div class="col-md-6 form-group">
+                <input type="text" name="Address2" value="@Model.Address2" placeholder=" " />
+                <label>Address 2</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 form-group">
+                <input type="text" name="Town" value="@Model.Town" placeholder=" " />
+                <label>Town</label>
+            </div>
+            <div class="col-md-4 form-group">
+                <input type="text" name="State" value="@Model.State" placeholder=" " />
+                <label>State</label>
+            </div>
+            <div class="col-md-4 form-group">
+                <input type="text" name="Country" value="@Model.Country" placeholder=" " />
+                <label>Country</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <input type="text" name="Role" value="@Model.Role" readonly placeholder=" " />
+                <label>Role</label>
+            </div>
+        </div>
+
+        <button type="submit">Save Changes</button>
+    }
+
+    <h3 class="mt-3">Change Password</h3>
+    @using (Html.BeginForm("ChangePassword", "Account", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-4 form-group">
+                <input type="password" name="CurrentPassword" required placeholder=" " />
+                <label>Current Password</label>
+            </div>
+            <div class="col-md-4 form-group">
+                <input type="password" name="NewPassword" required placeholder=" " />
+                <label>New Password</label>
+            </div>
+            <div class="col-md-4 form-group">
+                <input type="password" name="ConfirmPassword" required placeholder=" " />
+                <label>Confirm Password</label>
+            </div>
+        </div>
+        <button type="submit">Update Password</button>
+
+
+    }
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Load countries on page load
+        $.get('/Account/GetCountries', function (data) {
+            $('#Country').append('<option value="">--Select Country--</option>');
+            $.each(data, function (i, country) {
+                $('#Country').append('<option value="' + country.countryID + '">' + country.countryName + '</option>');
+            });
+        });
+
+            $('#Country').change(function () {
+            var countryId = $(this).val();
+            var $stateContainer = $('#StateContainer');
+            $stateContainer.empty(); // Clear previous state select or textbox
+
+            if (!countryId) return;
+
+            $.get('/Account/GetStates?countryId=' + countryId, function (data) {
+                if (data.length > 0) {
+                    // If states exist, show dropdown
+                    var $select = $('<select id="State" name="State" class="form-control" required><option value="">--Select State--</option></select>');
+                    $.each(data, function (i, state) {
+                        $select.append('<option value="' + state.stateName + '">' + state.stateName + '</option>');
+                    });
+                    $stateContainer.append($select);
+                } else {
+                    // If no states, show textbox
+                    var $input = $('<input type="text" name="State" id="State" placeholder="Enter State" required/>');
+                    $stateContainer.append($input);
+                }
+            });
+        });
+
+        $('#Email').on('blur', function () {
+            debugger
+        var email = $(this).val();
+        if (email) {
+            $.get('/Account/CheckEmail?email=' + encodeURIComponent(email), function (exists) {
+                if (exists === true) {
+                    alert("Email already registered. Please use another one.");
+                     $('#Email').val('');
+                    $('#Email').focus();
+
+                }
+            });
+        }
+    });
+    });
+</script>
+
+
+
