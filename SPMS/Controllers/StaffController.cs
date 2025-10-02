@@ -65,10 +65,10 @@ namespace SPMS.Controllers
                         model.LatestApplications.Add(new StaffAppRow
                         {
                             ApplicationID = Convert.ToInt32(r["ApplicationID"]),
-                            PermitType = r["PermitType"].ToString(),
-                            Status = r["Status"].ToString(),
+                            PermitType = r["PermitType"]?.ToString() ?? string.Empty,
+                            Status = r["Status"].ToString() ?? string.Empty,
                             SubmissionDate = Convert.ToDateTime(r["SubmissionDate"]),
-                            CitizenName = r["CitizenName"].ToString()
+                            CitizenName = r["CitizenName"].ToString() ?? string.Empty
                         });
                     }
                 }

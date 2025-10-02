@@ -80,15 +80,12 @@ namespace SPMS.Controllers
         {
             const string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@$!%*?&";
             StringBuilder result = new StringBuilder();
-            using (var rng = new RNGCryptoServiceProvider())
+            byte[] uintBuffer = new byte[sizeof(uint)];
+            while (result.Length < length)
             {
-                byte[] uintBuffer = new byte[sizeof(uint)];
-                while (result.Length < length)
-                {
-                    rng.GetBytes(uintBuffer);
-                    uint num = BitConverter.ToUInt32(uintBuffer, 0);
-                    result.Append(validChars[(int)(num % (uint)validChars.Length)]);
-                }
+                System.Security.Cryptography.RandomNumberGenerator.Fill(uintBuffer);
+                uint num = BitConverter.ToUInt32(uintBuffer, 0);
+                result.Append(validChars[(int)(num % (uint)validChars.Length)]);
             }
             return result.ToString();
         }
@@ -122,7 +119,7 @@ namespace SPMS.Controllers
             return string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
         }
 
-        private IActionResult RequireAdmin()
+        private IActionResult? RequireAdmin()
         {
             if (!IsAdmin()) return RedirectToAction("AccessDenied", "Account");
             return null;
@@ -178,10 +175,10 @@ namespace SPMS.Controllers
                         model.LatestApplications.Add(new AdminAppRow
                         {
                             ApplicationID = Convert.ToInt32(r["ApplicationID"]),
-                            PermitType = r["PermitType"].ToString(),
-                            Status = r["Status"].ToString(),
+                            PermitType = r["PermitType"].ToString() ?? string.Empty,
+                            Status = r["Status"].ToString() ?? string.Empty,
                             SubmissionDate = Convert.ToDateTime(r["SubmissionDate"]),
-                            CitizenName = r["CitizenName"].ToString()
+                            CitizenName = r["CitizenName"].ToString() ?? string.Empty
                         });
                     }
                 }
@@ -208,8 +205,8 @@ namespace SPMS.Controllers
                     {
                         UserID = Convert.ToInt32(r["UserID"]),
                         FullName = $"{r["Title"]} {r["FirstName"]} {r["LastName"]}".Trim(),
-                        Email = r["Email"].ToString(),
-                        Role = r["Role"].ToString(),
+                        Email = r["Email"].ToString() ?? string.Empty,
+                        Role = r["Role"].ToString() ?? string.Empty,
                         IsActive = Convert.ToBoolean(r["IsActive"]),
                         CreatedAt = Convert.ToDateTime(r["CreatedAt"])
                     });
@@ -268,12 +265,12 @@ namespace SPMS.Controllers
                     list.Add(new AdminAppRow
                     {
                         ApplicationID = Convert.ToInt32(r["ApplicationID"]),
-                        PermitType = r["PermitType"].ToString(),
-                        Status = r["Status"].ToString(),
+                        PermitType = r["PermitType"].ToString() ?? string.Empty,
+                        Status = r["Status"].ToString() ?? string.Empty,
                         SubmissionDate = Convert.ToDateTime(r["SubmissionDate"]),
-                        CitizenName = r["CitizenName"].ToString(),
-                        State = r["State"].ToString(),
-                        Country = r["Country"].ToString()
+                        CitizenName = r["CitizenName"].ToString() ?? string.Empty,
+                        State = r["State"].ToString() ?? string.Empty,
+                        Country = r["Country"].ToString() ?? string.Empty
                     });
                 }
             }
@@ -286,7 +283,7 @@ namespace SPMS.Controllers
             var reject = RequireAdmin();
             if (reject != null) return reject;
 
-            AdminAppDetail detail = null;
+            AdminAppDetail detail = new AdminAppDetail();
             using var conn = new SqlConnection(connectionString);
             conn.Open();
             using var cmd = new SqlCommand(@"
@@ -301,17 +298,17 @@ namespace SPMS.Controllers
                 detail = new AdminAppDetail
                 {
                     ApplicationID = Convert.ToInt32(r["ApplicationID"]),
-                    PermitType = r["PermitType"].ToString(),
-                    Status = r["Status"].ToString(),
+                    PermitType = r["PermitType"].ToString() ?? string.Empty,
+                    Status = r["Status"].ToString() ?? string.Empty,
                     SubmissionDate = Convert.ToDateTime(r["SubmissionDate"]),
-                    CitizenName = r["CitizenName"].ToString(),
-                    Email = r["Email"].ToString(),
-                    Address1 = r["Address1"].ToString(),
-                    Address2 = r["Address2"]?.ToString(),
-                    Town = r["Town"]?.ToString(),
-                    State = r["State"]?.ToString(),
-                    Country = r["Country"]?.ToString(),
-                    Comments = r["Comments"]?.ToString()
+                    CitizenName = r["CitizenName"].ToString() ?? string.Empty,
+                    Email = r["Email"].ToString() ?? string.Empty,
+                    Address1 = r["Address1"].ToString() ?? string.Empty,
+                    Address2 = r["Address2"]?.ToString() ?? string.Empty,
+                    Town = r["Town"]?.ToString() ?? string.Empty,
+                    State = r["State"]?.ToString() ?? string.Empty,
+                    Country = r["Country"]?.ToString() ?? string.Empty,
+                    Comments = r["Comments"]?.ToString() ?? string.Empty
                 };
             }
             return View(detail);
@@ -333,8 +330,8 @@ namespace SPMS.Controllers
                 list.Add(new PermitTypeRow
                 {
                     PermitTypeID = Convert.ToInt32(r["PermitTypeID"]),
-                    TypeName = r["TypeName"].ToString(),
-                    Description = r["Description"]?.ToString()
+                    TypeName = r["TypeName"].ToString() ?? string.Empty,
+                    Description = r["Description"]?.ToString() ?? string.Empty
                 });
             }
             return View(list);
@@ -384,12 +381,60 @@ namespace SPMS.Controllers
                 {
                     LogID = Convert.ToInt32(r["LogID"]),
                     ApplicationID = r["ApplicationID"] != DBNull.Value ? Convert.ToInt32(r["ApplicationID"]) : 0,
-                    Action = r["Action"].ToString(),
-                    PerformedBy = r["PerformedBy"].ToString(),
+                    Action = r["Action"].ToString() ?? string.Empty,
+                    PerformedBy = r["PerformedBy"].ToString() ?? string.Empty,
                     PerformedAt = Convert.ToDateTime(r["PerformedAt"])
                 });
             }
             return View(logs);
+        }
+
+        // GET: /Account/GetCountries
+        public JsonResult GetCountries()
+        {
+            var countries = _db.Country
+                .Select(c => new
+                {
+                    countryID = c.CountryID,
+                    countryName = c.Name
+                })
+                .OrderBy(c => c.countryName)
+                .ToList();
+
+            return Json(countries);
+        }
+
+        // GET: /Account/GetStates?countryId=1
+        public JsonResult GetStates(int countryId)
+        {
+            // Get ISO code for country
+            var countryIso = _db.Country
+                .Where(c => c.CountryID == countryId)
+                .Select(c => c.ISO)
+                .FirstOrDefault();
+
+            if (string.IsNullOrEmpty(countryIso))
+                return Json(new List<object>());
+
+            var states = _db.State
+                .Where(s => s.CountryISO == countryIso)
+                .Select(s => new
+                {
+                    stateID = s.StateID,
+                    stateName = s.Name
+                })
+                .OrderBy(s => s.stateName)
+                .ToList();
+
+            return Json(states);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                _db.Dispose();
+
+            base.Dispose(disposing);
         }
     }
 

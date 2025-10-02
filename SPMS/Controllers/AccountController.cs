@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SPMS.Models;
 using System;
+using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -44,6 +47,14 @@ namespace SPMS.Controllers
         {
             model.Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
             string connectionString = _db.Database.GetDbConnection().ConnectionString;
+            if (_db.Users.Any(u => u.Email == model.Email))
+            {
+                ModelState.AddModelError("Email", "This email is already registered.");
+                return View(model);
+            }
+
+           
+
             if (ModelState.IsValid)
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -71,7 +82,8 @@ namespace SPMS.Controllers
                     cmd.Parameters.AddWithValue("@IPAddress", HttpContext.Connection.RemoteIpAddress?.ToString());
                     cmd.ExecuteNonQuery();
                 }
-
+                //SendWelcomeEmail(model.Email, model.FirstName);
+                TempData["SuccessMessage"] = "Registration successful! You can now log in.";
                 return RedirectToAction("Login");
             }
 
@@ -123,7 +135,92 @@ namespace SPMS.Controllers
             return RedirectToAction("Login");
         }
 
-       
+        // GET: /Account/GetCountries
+        public JsonResult GetCountries()
+        {
+            var countries = _db.Country
+                .Select(c => new
+                {
+                    countryID = c.CountryID,
+                    countryName = c.Name
+                })
+                .OrderBy(c => c.countryName)
+                .ToList();
+
+            return Json(countries);
+        }
+
+        // GET: /Account/GetStates?countryId=1
+        public JsonResult GetStates(int countryId)
+        {
+            // Get ISO code for country
+            var countryIso = _db.Country
+                .Where(c => c.CountryID == countryId)
+                .Select(c => c.ISO)
+                .FirstOrDefault();
+
+            if (string.IsNullOrEmpty(countryIso))
+                return Json(new List<object>());
+
+            var states = _db.State
+                .Where(s => s.CountryISO == countryIso)
+                .Select(s => new
+                {
+                    stateID = s.StateID,
+                    stateName = s.Name
+                })
+                .OrderBy(s => s.stateName)
+                .ToList();
+
+            return Json(states);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                _db.Dispose();
+
+            base.Dispose(disposing);
+        }
+
+
+        [HttpGet]
+        public JsonResult CheckEmail(string email)
+        {
+            var exists = _db.Users.Any(u => u.Email == email);
+            return Json(exists);
+        }
+
+        private void SendWelcomeEmail(string toEmail, string firstName)
+        {
+            var fromAddress = new MailAddress("yourapp@example.com", "Smart Permit System");
+            var toAddress = new MailAddress(toEmail);
+            const string fromPassword = "your-app-password"; // Use a real SMTP app password, not your normal one
+            string subject = "Welcome to Smart Permit System";
+            string body = $"Hi {firstName},\n\nYour registration was successful. You can now log in and start using the system.\n\nThanks,\nSmart Permit Team";
+
+            using (var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",      // change if using another provider
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            })
+            {
+                using (var message = new MailMessage(fromAddress, toAddress)
+                {
+                    Subject = subject,
+                    Body = body
+                })
+                {
+                    smtp.Send(message);
+                }
+            }
+        }
+
+
     }
 }
 

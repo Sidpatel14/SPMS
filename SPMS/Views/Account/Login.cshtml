@@ -141,7 +141,12 @@
     {
         <div class="alert alert-danger">@ViewBag.Error</div>
     }
-
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
     @using (Html.BeginForm("Login", "Account", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
@@ -163,3 +168,10 @@
         <a href="#">Forgot Password?</a>
     </div>
 </div>
+<script>
+    $(document).ready(function () {
+        setTimeout(function () {
+            $('.alert-success').fadeOut('slow');
+        }, 4000); // hide after 4 seconds
+    });
+</script>

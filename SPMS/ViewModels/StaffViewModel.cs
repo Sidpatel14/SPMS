@@ -11,10 +11,10 @@
 public class StaffAppRow
 {
     public int ApplicationID { get; set; }
-    public string CitizenName { get; set; }
-    public string PermitType { get; set; }
-    public string Status { get; set; }
+    public string CitizenName { get; set; } = null!;
+    public string PermitType { get; set; } = null!;
+    public string Status { get; set; } = null!;
     public DateTime SubmissionDate { get; set; }
-    public string State { get; set; }
-    public string Country { get; set; }
+    public string State { get; set; } = null!;
+    public string Country { get; set; } = null!;
 }

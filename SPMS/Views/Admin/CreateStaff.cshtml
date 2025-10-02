@@ -208,17 +208,17 @@
                     <div class="col-md-4 input-icon">
                         <label>Country</label>
                         <input type="text" name="Country" class="form-control" />
-                        @* <select id="Country" name="Country" class="form-control" required>
-                    <option value="">--Select Country--</option>
-                </select> *@
+                        <select id="Country" name="Country" class="form-control" required>
+                            <option value="">--Select Country--</option>
+                        </select>
                     </div>
 
                     <div class="col-md-4 input-icon">
                         <label>State</label>
                         <input type="text" name="State" class="form-control" />
-                        @*  <select id="State" name="State" class="form-control" required>
-                    <option value="">--Select State--</option>
-                </select> *@
+                        <select id="State" name="State" class="form-control" required>
+                            <option value="">--Select State--</option>
+                        </select>
                     </div>
                 </div>
 
@@ -227,6 +227,28 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Register</button>
         }
-       
+
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        // Load countries on page load
+        $.get('/Account/GetCountries', function (data) {
+            $.each(data, function (i, country) {
+                $('#Country').append('<option value="' + country.countryID + '">' + country.countryName + '</option>');
+            });
+        });
+
+        // Load states when country changes
+        $('#Country').change(function () {
+            var countryId = $(this).val();
+            $('#State').empty().append('<option value="">--Select State--</option>');
+            $.get('/Account/GetStates?countryId=' + countryId, function (data) {
+                $.each(data, function (i, state) {
+                    $('#State').append('<option value="' + state.stateName + '">' + state.stateName + '</option>');
+                });
+            });
+        });
+    });
+</script>
