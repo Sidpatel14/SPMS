@@ -6,7 +6,7 @@ using System.Data;
 
 namespace SPMS.Controllers
 {
-    public class StaffController : Controller
+    public class StaffController : BaseController
     {
         private readonly SpmsContext _db;
         public StaffController(SpmsContext context)
@@ -17,6 +17,7 @@ namespace SPMS.Controllers
         // Staff Dashboard - show all pending or under-review applications
         public IActionResult Dashboard()
         {
+            var userId = HttpContext.Session.GetString("UserID");
             var role = HttpContext.Session.GetString("Role");
             if (role != "Staff")
                 return RedirectToAction("AccessDenied", "Account");

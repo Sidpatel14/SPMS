@@ -9,7 +9,7 @@ using Microsoft.Data.SqlClient;
 
 namespace SPMS.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
         private readonly SpmsContext _db;
         private readonly string connectionString;
@@ -130,6 +130,7 @@ namespace SPMS.Controllers
         {
             //var reject = RequireAdmin();
             //if (reject != null) return reject;
+            var userId = HttpContext.Session.GetString("UserID");
             var role = HttpContext.Session.GetString("Role");
             if (role != "Admin")
                 return RedirectToAction("AccessDenied", "Account");

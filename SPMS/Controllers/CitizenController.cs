@@ -8,7 +8,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace SPMS.Controllers
 {
-    public class CitizenController : Controller
+    public class CitizenController : BaseController
     {
         private readonly SpmsContext _db;
         public CitizenController(SpmsContext context)
@@ -29,7 +29,13 @@ namespace SPMS.Controllers
         }
         public IActionResult Apply()
         {
+            // Fetch permit types from the database
+            var permitTypes = _db.PermitTypes
+                     .Select(p => new { p.PermitTypeId, p.Name })
+                     .ToList<object>();
 
+            // Pass to view
+            ViewBag.PermitTypes = permitTypes;
             return View();
         }
 
