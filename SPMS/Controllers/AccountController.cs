@@ -238,10 +238,15 @@ namespace SPMS.Controllers
             }
         }
 
+        // GET: /Account/ForgotPassword
+        public ActionResult ForgetPassword()
+        {
+            return View();
+        }
         // =========== Forget Password =============
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ForgotPassword(string email)
+        public IActionResult ForgetPassword(string email)
         {
             var user = _db.Users.FirstOrDefault(u => u.Email == email);
             if (user != null)
