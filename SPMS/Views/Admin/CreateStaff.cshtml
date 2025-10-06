@@ -1,29 +1,18 @@
-﻿@{
-    ViewBag.Title = "Add Staff";
-    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
-}
-
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-success">@ViewBag.Message</div>
-}
-
+﻿
 
 <style>
-    /* Container */
     .container {
-        max-width: 700px;
+        max-width: 750px;
         margin: 50px auto;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Card */
     .card {
-        background: linear-gradient(145deg, #ffffff, #f7f9fc);
+        background: #fff;
         border-radius: 15px;
         padding: 40px 35px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
     }
 
         .card:hover {
@@ -31,63 +20,38 @@
             box-shadow: 0 18px 35px rgba(0, 0, 0, 0.12);
         }
 
-        /* Heading */
-        .card h3 {
-            font-weight: 600;
-            color: #222;
-            margin-bottom: 30px;
-            font-size: 28px;
-            text-align: center;
-        }
-
-        /* Labels */
-        .card label {
-            font-weight: 500;
-            margin-bottom: 5px;
-            display: block;
-            color: #555;
-        }
-
-    /* Input wrapper for icons */
-    .input-icon {
-        position: relative;
+    h3 {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 30px;
+        font-size: 28px;
+        text-align: center;
     }
 
-        .input-icon input,
-        .input-icon select {
-            padding-left: 40px;
-        }
+    label {
+        font-weight: 500;
+        margin-bottom: 6px;
+        display: block;
+        color: #333;
+    }
 
-        /* Icons inside inputs */
-        .input-icon i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #aaa;
-        }
-
-    /* Inputs */
-    .card input,
-    .card select {
+    input, select {
         height: 45px;
         border-radius: 10px;
-        border: 1px solid #ddd;
+        border: 1px solid #ccc;
         padding: 0 15px;
         width: 100%;
-        transition: all 0.3s ease;
         background-color: #fefefe;
+        transition: border 0.3s ease, box-shadow 0.3s ease;
     }
 
-        .card input:focus,
-        .card select:focus {
+        input:focus, select:focus {
             border-color: #007bff;
             box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
             outline: none;
         }
 
-    /* Submit Button */
-    .card button {
+    .btn-primary {
         background: linear-gradient(to right, #007bff, #0056b3);
         border: none;
         color: #fff;
@@ -96,43 +60,101 @@
         padding: 12px 0;
         border-radius: 10px;
         margin-top: 20px;
+        width: 100%;
         transition: all 0.3s ease;
     }
 
-        .card button:hover {
+        .btn-primary:hover {
             background: linear-gradient(to right, #0056b3, #003f7f);
             transform: translateY(-2px);
         }
 
-    /* Error Alert */
     .alert {
         padding: 12px 15px;
         border-radius: 10px;
         margin-bottom: 20px;
         font-size: 14px;
+    }
+
+    .alert-success {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .alert-danger {
         background: #f8d7da;
         color: #842029;
     }
 
-    /* Links */
-    .card .text-center a {
-        color: #007bff;
-        text-decoration: none;
-        font-weight: 500;
+    .form-section {
+        margin-bottom: 25px;
     }
 
-        .card .text-center a:hover {
-            text-decoration: underline;
+        .form-section h5 {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #007bff;
+            border-left: 4px solid #007bff;
+            padding-left: 8px;
         }
-
-    /* Responsive adjustments */
-
 </style>
+<script>
+    $(document).ready(function () {
+        // Load countries on page load
+        $.get('/Account/GetCountries', function (data) {
+            $('#Country').append('<option value="">--Select Country--</option>');
+            $.each(data, function (i, country) {
+                $('#Country').append('<option value="' + country.countryID + '">' + country.countryName + '</option>');
+            });
+        });
 
+            $('#Country').change(function () {
+            var countryId = $(this).val();
+            var $stateContainer = $('#StateContainer');
+            $stateContainer.empty(); // Clear previous state select or textbox
+
+            if (!countryId) return;
+
+            $.get('/Account/GetStates?countryId=' + countryId, function (data) {
+                if (data.length > 0) {
+                    // If states exist, show dropdown
+                    var $select = $('<select id="State"  required><option value="">--Select State--</option></select>');
+                    $.each(data, function (i, state) {
+                        $select.append('<option value="' + state.stateName + '">' + state.stateName + '</option>');
+                    });
+                    $stateContainer.append($select);
+                } else {
+                    // If no states, show textbox
+                    var $input = $('<input type="text" id="State" placeholder="Enter State" required/>');
+                    $stateContainer.append($input);
+                }
+            });
+        });
+
+        $('#Email').on('blur', function () {
+            debugger
+        var email = $(this).val();
+        if (email) {
+            $.get('/Account/CheckEmail?email=' + encodeURIComponent(email), function (exists) {
+                if (exists === true) {
+                    alert("Email already registered. Please use another one.");
+                     $('#Email').val('');
+                    $('#Email').focus();
+
+                }
+            });
+        }
+    });
+    });
+</script>
 <div class="container mt-5">
     <div class="card shadow p-4">
-        <h3 class="mb-4 text-center">Add Staff</h3>
+        <h3>Add New Staff Member</h3>
 
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-success">@ViewBag.Message</div>
+        }
         @if (ViewBag.Error != null)
         {
             <div class="alert alert-danger">@ViewBag.Error</div>
@@ -141,114 +163,97 @@
         @using (Html.BeginForm("CreateStaff", "Admin", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
-            <div class="row">
+
+            <!-- Personal Info -->
+            <div class="form-section">
+                <h5>Personal Information</h5>
                 <div class="row mb-3">
-                    <div class="col-md-2 input-icon">
+                    <div class="col-md-2">
                         <label>Title</label>
                         <select name="Title" class="form-control" required>
-                            <option value="Mr">Mr</option>
-                            <option value="Mrs">Mrs</option>
-                            <option value="Miss">Miss</option>
+                            <option value="">Select</option>
+                            <option>Mr</option>
+                            <option>Mrs</option>
+                            <option>Miss</option>
                         </select>
                     </div>
-
-                    <div class="col-md-4 input-icon">
+                    <div class="col-md-5">
                         <label>First Name</label>
-                        <input type="text" name="FirstName" class="form-control" required />
+                        <input type="text" name="FirstName" required />
                     </div>
-
-                    <div class="col-md-4 input-icon">
+                    <div class="col-md-5">
                         <label>Last Name</label>
-                        <input type="text" name="LastName" class="form-control" required />
+                        <input type="text" name="LastName" required />
                     </div>
-                    <div class="col-md-2 input-icon ">
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Email</label>
+                        <input type="email" name="Email" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label>Password</label>
+                        <input type="password" name="Password" required />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Phone</label>
+                        <input type="text" name="Phone" />
+                    </div>
+                    <div class="col-md-6">
                         <label>Role</label>
-                        <select type="text" name="role" class="form-control" required>
-                            <option>Citizen</option>
+                        <select name="Role" required>
+                            <option value="">Select Role</option>
                             <option>Staff</option>
                             <option>Admin</option>
                         </select>
                     </div>
                 </div>
+            </div>
 
+            <!-- Address -->
+            <div class="form-section">
+                <h5>Address Details</h5>
                 <div class="row mb-3">
-                    <div class="col-md-6 input-icon">
-                        <label>Email</label>
-                        <input type="email" name="Email" class="form-control" required />
-                    </div>
-                    <div class="col-md-6 input-icon">
-                        <label>Password</label>
-                        <input type="password" name="Password" class="form-control" required />
-                    </div>
-
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6 input-icon">
-                        <label>Phone</label>
-                        <input type="text" name="Phone" class="form-control" />
-                    </div>
-
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6 input-icon">
+                    <div class="col-md-6">
                         <label>Address 1</label>
-                        <input type="text" name="Address1" class="form-control" required />
+                        <input type="text" name="Address1" required />
                     </div>
-                    <div class="col-md-6 input-icon">
+                    <div class="col-md-6">
                         <label>Address 2</label>
-                        <input type="text" name="Address2" class="form-control" />
+                        <input type="text" name="Address2" />
                     </div>
                 </div>
+
                 <div class="row mb-3">
-                    <div class="col-md-4 input-icon ">
+                    <div class="col-md-4">
                         <label>Town</label>
-                        <input type="text" name="Town" class="form-control" />
+                        <input type="text" name="Town" />
                     </div>
-                    <div class="col-md-4 input-icon">
+                    <div class="col-md-4">
                         <label>Country</label>
-                        <input type="text" name="Country" class="form-control" />
-                        <select id="Country" name="Country" class="form-control" required>
+                        <select id="Country" name="Country" required>
                             <option value="">--Select Country--</option>
                         </select>
                     </div>
-
-                    <div class="col-md-4 input-icon">
+                    <div class="col-md-4" >
                         <label>State</label>
-                        <input type="text" name="State" class="form-control" />
-                        <select id="State" name="State" class="form-control" required>
-                            <option value="">--Select State--</option>
-                        </select>
+                        <div id="StateContainer">
+                            <select id="State" name="State" required>
+                                <option value="">--Select State--</option>
+                            </select>
+                        </div>
+                       
                     </div>
                 </div>
-
-
-
             </div>
-            <button type="submit" class="btn btn-primary w-100">Register</button>
+
+            <button type="submit" class="btn-primary">Register Staff</button>
         }
 
     </div>
 </div>
 
-<script>
-    $(document).ready(function () {
-        // Load countries on page load
-        $.get('/Account/GetCountries', function (data) {
-            $.each(data, function (i, country) {
-                $('#Country').append('<option value="' + country.countryID + '">' + country.countryName + '</option>');
-            });
-        });
-
-        // Load states when country changes
-        $('#Country').change(function () {
-            var countryId = $(this).val();
-            $('#State').empty().append('<option value="">--Select State--</option>');
-            $.get('/Account/GetStates?countryId=' + countryId, function (data) {
-                $.each(data, function (i, state) {
-                    $('#State').append('<option value="' + state.stateName + '">' + state.stateName + '</option>');
-                });
-            });
-        });
-    });
-</script>
