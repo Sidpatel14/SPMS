@@ -8,8 +8,8 @@ namespace SPMS.Controllers
 {
     public class StaffController : Controller
     {
-        private readonly MyDbContext _db;
-        public StaffController(MyDbContext context)
+        private readonly SpmsContext _db;
+        public StaffController(SpmsContext context)
         {
             _db = context;
 

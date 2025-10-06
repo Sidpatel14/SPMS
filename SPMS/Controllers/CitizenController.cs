@@ -10,8 +10,8 @@ namespace SPMS.Controllers
 {
     public class CitizenController : Controller
     {
-        private readonly MyDbContext _db;
-        public CitizenController(MyDbContext context)
+        private readonly SpmsContext _db;
+        public CitizenController(SpmsContext context)
         {
             _db = context;
         }

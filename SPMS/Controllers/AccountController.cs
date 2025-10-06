@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SPMS.Models;
 using System;
+using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
@@ -17,21 +18,14 @@ namespace SPMS.Controllers
     public class AccountController : Controller
     {
 
-        private readonly MyDbContext _db;
-        public AccountController(MyDbContext context)
+        private readonly SpmsContext _db;
+        private readonly string connectionString;
+        private readonly EmailService _emailService;
+        public AccountController(SpmsContext context, EmailService emailService)
         {
             _db = context;
-            
-        }
-
-        // Hash password
-        private string HashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
-            }
+            connectionString = _db.Database.GetDbConnection().ConnectionString;
+            _emailService = emailService;
         }
 
         // GET: /Account/Register
@@ -40,54 +34,69 @@ namespace SPMS.Controllers
             return View();
         }
 
-        
-
         [HttpPost]
-        public IActionResult Register(User model)
+        public async Task<IActionResult> Register(User model)
         {
             model.Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
-            string connectionString = _db.Database.GetDbConnection().ConnectionString;
-            if (_db.Users.Any(u => u.Email == model.Email))
-            {
-                ModelState.AddModelError("Email", "This email is already registered.");
-                return View(model);
-            }
 
-           
+            string hashedPassword = HashPassword(model.Password);
+            //model.Ipaddress = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
 
-            if (ModelState.IsValid)
+            try
             {
-                using (SqlConnection con = new SqlConnection(connectionString))
+                long newUserId;
+                using (var conn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand("sp_CreateUser", conn))
                 {
-                    con.Open();
-                    //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-                    string hashedPassword = HashPassword(model.Password);
-
-                    SqlCommand cmd = new SqlCommand(@"INSERT INTO Users 
-                (Title, FirstName, LastName, Email, Password, Role, Phone, Address1, Address2, Town, State, Country, CreatedAt) 
-                VALUES 
-                (@Title, @FirstName, @LastName, @Email, @Password, 'Citizen', @Phone, @Address1, @Address2, @Town, @State, @Country, GETDATE())", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@Title", model.Title);
                     cmd.Parameters.AddWithValue("@FirstName", model.FirstName);
                     cmd.Parameters.AddWithValue("@LastName", model.LastName);
                     cmd.Parameters.AddWithValue("@Email", model.Email);
                     cmd.Parameters.AddWithValue("@Password", hashedPassword);
+                    cmd.Parameters.AddWithValue("@Role", "Citizen");
                     cmd.Parameters.AddWithValue("@Phone", model.Phone ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Address1", model.Address1);
                     cmd.Parameters.AddWithValue("@Address2", model.Address2 ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Town", model.Town ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@State", model.State);
                     cmd.Parameters.AddWithValue("@Country", model.Country);
-                    cmd.Parameters.AddWithValue("@IPAddress", HttpContext.Connection.RemoteIpAddress?.ToString());
+                    cmd.Parameters.AddWithValue("@IPAddress", model.Ipaddress ?? (object)DBNull.Value);
+
+                    conn.Open();
+                    newUserId = Convert.ToInt64(cmd.ExecuteScalar());
+                }
+
+                // log in AuditLogs
+                using (var conn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand("INSERT INTO AuditLogs(UserID, Action, Timestamp, Notes) VALUES(@UserID, @Action, GETDATE(), @Notes)", conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserID", newUserId);
+                    cmd.Parameters.AddWithValue("@Action", "User Created");
+                    cmd.Parameters.AddWithValue("@Notes", $"User {model.Email} created with role Citizen");
+                    conn.Open();
                     cmd.ExecuteNonQuery();
                 }
-                //SendWelcomeEmail(model.Email, model.FirstName);
+
+                // Send welcome email
+                //string subject = "Welcome to SPMS";
+                //string body = $"Hi {model.FirstName},<br/>Your account has been created successfully.";
+                //await _emailService.SendEmailAsync(model.Email, subject, body);
                 TempData["SuccessMessage"] = "Registration successful! You can now log in.";
                 return RedirectToAction("Login");
             }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("Email already exists"))
+                    ModelState.AddModelError("Email", "This email is already registered.");
+                return View(model);
+                throw;
+            }
+            //}
+            //return BadRequest("Invalid data.");
 
-            return View(model);
+            //return View(model);
         }
 
         // GET: /Account/Login
@@ -138,10 +147,10 @@ namespace SPMS.Controllers
         // GET: /Account/GetCountries
         public JsonResult GetCountries()
         {
-            var countries = _db.Country
+            var countries = _db.Countries
                 .Select(c => new
                 {
-                    countryID = c.CountryID,
+                    countryID = c.CountryId,
                     countryName = c.Name
                 })
                 .OrderBy(c => c.countryName)
@@ -154,19 +163,19 @@ namespace SPMS.Controllers
         public JsonResult GetStates(int countryId)
         {
             // Get ISO code for country
-            var countryIso = _db.Country
-                .Where(c => c.CountryID == countryId)
-                .Select(c => c.ISO)
+            var countryIso = _db.Countries
+                .Where(c => c.CountryId == countryId)
+                .Select(c => c.Iso)
                 .FirstOrDefault();
 
             if (string.IsNullOrEmpty(countryIso))
                 return Json(new List<object>());
 
-            var states = _db.State
-                .Where(s => s.CountryISO == countryIso)
+            var states = _db.States
+                .Where(s => s.CountryIso == countryIso)
                 .Select(s => new
                 {
-                    stateID = s.StateID,
+                    stateID = s.StateId,
                     stateName = s.Name
                 })
                 .OrderBy(s => s.stateName)
@@ -183,6 +192,15 @@ namespace SPMS.Controllers
             base.Dispose(disposing);
         }
 
+        // Hash password
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+            }
+        }
 
         [HttpGet]
         public JsonResult CheckEmail(string email)

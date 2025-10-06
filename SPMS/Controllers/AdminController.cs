@@ -11,10 +11,10 @@ namespace SPMS.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly MyDbContext _db;
+        private readonly SpmsContext _db;
         private readonly string connectionString;
 
-        public AdminController(MyDbContext context)
+        public AdminController(SpmsContext context)
         {
             _db = context;
              connectionString = _db.Database.GetDbConnection().ConnectionString;
@@ -392,10 +392,10 @@ namespace SPMS.Controllers
         // GET: /Account/GetCountries
         public JsonResult GetCountries()
         {
-            var countries = _db.Country
+            var countries = _db.Countries
                 .Select(c => new
                 {
-                    countryID = c.CountryID,
+                    countryID = c.CountryId,
                     countryName = c.Name
                 })
                 .OrderBy(c => c.countryName)
@@ -408,19 +408,19 @@ namespace SPMS.Controllers
         public JsonResult GetStates(int countryId)
         {
             // Get ISO code for country
-            var countryIso = _db.Country
-                .Where(c => c.CountryID == countryId)
-                .Select(c => c.ISO)
+            var countryIso = _db.Countries
+                .Where(c => c.CountryId == countryId)
+                .Select(c => c.Iso)
                 .FirstOrDefault();
 
             if (string.IsNullOrEmpty(countryIso))
                 return Json(new List<object>());
 
-            var states = _db.State
-                .Where(s => s.CountryISO == countryIso)
+            var states = _db.States
+                .Where(s => s.CountryIso == countryIso)
                 .Select(s => new
                 {
-                    stateID = s.StateID,
+                    stateID = s.StateId,
                     stateName = s.Name
                 })
                 .OrderBy(s => s.stateName)

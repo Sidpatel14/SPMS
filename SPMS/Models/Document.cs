@@ -5,9 +5,9 @@ namespace SPMS.Models;
 
 public partial class Document
 {
-    public int DocumentId { get; set; }
+    public long DocumentId { get; set; }
 
-    public int ApplicationId { get; set; }
+    public long ApplicationId { get; set; }
 
     public string FileName { get; set; } = null!;
 
@@ -16,4 +16,6 @@ public partial class Document
     public DateTime? UploadedAt { get; set; }
 
     public string? DocumentType { get; set; }
+
+    public virtual Application Application { get; set; } = null!;
 }

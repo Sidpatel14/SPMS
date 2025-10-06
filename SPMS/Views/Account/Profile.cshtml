@@ -154,62 +154,62 @@
             <div class="col-md-2 form-group">
                 <select name="Title" class="form-control" required>
                     <option value="">Title</option>
-                    <option value="Mr" selected="@(Model != null && Model.Title == "Mr" ? "selected" : null)">Mr</option>
-                    <option value="Mrs" selected="@(Model != null && Model.Title == "Mrs" ? "selected" : null)">Mrs</option>
-                    <option value="Miss" selected="@(Model != null && Model.Title == "Miss" ? "selected" : null)">Miss</option>
+                    <option value="Mr" selected="@(Model?.Title == "Mr" ? "selected" : null)">Mr</option>
+                    <option value="Mrs" selected="@(Model?.Title == "Mrs" ? "selected" : null)">Mrs</option>
+                    <option value="Miss" selected="@(Model?.Title == "Miss" ? "selected" : null)">Miss</option>
                 </select>
                 <label>Title</label>
             </div>
             <div class="col-md-5 form-group">
-                <input type="text" name="FirstName" value="@Model.FirstName" required placeholder=" " />
+                <input type="text" name="FirstName" value="@(Model?.FirstName ?? string.Empty)" required placeholder=" " />
                 <label>First Name</label>
             </div>
             <div class="col-md-5 form-group">
-                <input type="text" name="LastName" value="@Model.LastName" required placeholder=" " />
+                <input type="text" name="LastName" value="@(Model?.LastName ?? string.Empty)" required placeholder=" " />
                 <label>Last Name</label>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 form-group">
-                <input type="email" name="Email" value="@Model.Email" required placeholder=" " />
+                <input type="email" name="Email" value="@(Model?.Email ?? string.Empty)" required placeholder=" " />
                 <label>Email</label>
             </div>
             <div class="col-md-6 form-group">
-                <input type="text" name="Phone" value="@Model.Phone" placeholder=" " />
+                <input type="text" name="Phone" value="@(Model?.Phone ?? string.Empty)" placeholder=" " />
                 <label>Phone</label>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 form-group">
-                <input type="text" name="Address1" value="@Model.Address1" required placeholder=" " />
+                <input type="text" name="Address1" value="@(Model?.Address1 ?? string.Empty)" required placeholder=" " />
                 <label>Address 1</label>
             </div>
             <div class="col-md-6 form-group">
-                <input type="text" name="Address2" value="@Model.Address2" placeholder=" " />
+                <input type="text" name="Address2" value="@(Model?.Address2 ?? string.Empty)" placeholder=" " />
                 <label>Address 2</label>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-4 form-group">
-                <input type="text" name="Town" value="@Model.Town" placeholder=" " />
+                <input type="text" name="Town" value="@(Model?.Town ?? string.Empty)" placeholder=" " />
                 <label>Town</label>
             </div>
             <div class="col-md-4 form-group">
-                <input type="text" name="State" value="@Model.State" placeholder=" " />
+                <input type="text" name="State" value="@(Model?.State ?? string.Empty)" placeholder=" " />
                 <label>State</label>
             </div>
             <div class="col-md-4 form-group">
-                <input type="text" name="Country" value="@Model.Country" placeholder=" " />
+                <input type="text" name="Country" value="@(Model?.Country ?? string.Empty)" placeholder=" " />
                 <label>Country</label>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 form-group">
-                <input type="text" name="Role" value="@Model.Role" readonly placeholder=" " />
+                <input type="text" name="Role" value="@(Model?.Role ?? string.Empty)" readonly placeholder=" " />
                 <label>Role</label>
             </div>
         </div>

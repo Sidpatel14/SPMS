@@ -5,7 +5,7 @@ namespace SPMS.Models;
 
 public partial class User
 {
-    public int UserId { get; set; }
+    public long UserId { get; set; }
 
     public string Title { get; set; } = null!;
 
@@ -40,4 +40,12 @@ public partial class User
     public DateTime? LastLogin { get; set; }
 
     public bool? IsActive { get; set; }
+
+    public virtual ICollection<Application> ApplicationApplicants { get; set; } = new List<Application>();
+
+    public virtual ICollection<Application> ApplicationApprovedByNavigations { get; set; } = new List<Application>();
+
+    public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
