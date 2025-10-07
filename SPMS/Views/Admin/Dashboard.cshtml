@@ -4,55 +4,101 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Admin Dashboard</h2>
-
-    <div class="row mb-3">
-        <div class="col-md-3">
-            <div class="card stat-card text-center p-3 bg-light">
-                <h6>Total Applications</h6>
-                <h3>@Model.TotalApplications</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card text-center p-3 bg-warning text-white">
-                <h6>Submitted</h6>
-                <h3>@Model.Submitted</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card text-center p-3 bg-success text-white">
-                <h6>Under Review</h6>
-                <h3>@Model.UnderReview</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card text-center p-3 bg-danger text-white">
-                <h6>Approved</h6>
-                <h3>@Model.Approved</h3>
-            </div>
+<div class="row g-3 mb-4 text-center">
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-white shadow-sm">
+            <i class="fa fa-folder-open fa-2x text-primary mb-2"></i>
+            <h6>Total Applications</h6>
+            <h2 class="fw-bold">@Model.TotalApplications</h2>
         </div>
     </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-warning text-white shadow-sm">
+            <i class="fa fa-upload fa-2x mb-2"></i>
+            <h6>Submitted</h6>
+            <h2 class="fw-bold">@Model.Submitted</h2>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-info text-white shadow-sm">
+            <i class="fa fa-spinner fa-2x mb-2"></i>
+            <h6>Under Review</h6>
+            <h2 class="fw-bold">@Model.UnderReview</h2>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-success text-white shadow-sm">
+            <i class="fa fa-check-circle fa-2x mb-2"></i>
+            <h6>Approved</h6>
+            <h2 class="fw-bold">@Model.Approved</h2>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-danger text-white shadow-sm">
+            <i class="fa fa-times-circle fa-2x mb-2"></i>
+            <h6>Rejected</h6>
+            <h2 class="fw-bold">@Model.Rejected</h2>
+        </div>
+    </div>
+</div>
 
-    <div class="card p-3">
-        <h5>Latest Applications</h5>
-        <table class="table">
-            <thead>
-                <tr><th>ID</th><th>Citizen</th><th>Type</th><th>Status</th><th>Submitted</th><th></th></tr>
-            </thead>
-            <tbody>
+<div class="card p-4">
+    <h5 class="mb-3">Recent Applications</h5>
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Citizen Name</th>
+                <th>Permit Type</th>
+                <th>Status</th>
+                <th>Submitted On</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.LatestApplications != null && Model.LatestApplications.Any())
+            {
                 @foreach (var a in Model.LatestApplications)
                 {
                     <tr>
                         <td>@a.ApplicationID</td>
                         <td>@a.CitizenName</td>
                         <td>@a.PermitType</td>
+                        @if (a.PermitType == "Submitted")
+                        {
+                            <td><span class="badge bg-warning">@a.PermitType</span></td>
+                        }
+                        else if (a.PermitType == "Under Review")
+                        {
+                            <td><span class="badge bg-info">@a.PermitType</span></td>
+                        }
+                        else if (a.PermitType == "Approved")
+                        {
+                            <td><span class="badge bg-success">@a.PermitType</span></td>
+                        }
+                        else if (a.PermitType == "Rejected")
+                        {
+                            <td><span class="badge bg-danger">@a.PermitType</span></td>
+                        }
+                        else
+                        {
+                            <td><span class="badge bg-light">@a.PermitType</span></td>
+                        }
                         <td>@a.Status</td>
                         <td>@a.SubmissionDate.ToString("yyyy-MM-dd")</td>
                         <td><a class="btn btn-sm btn-primary" href="@Url.Action("ApplicationDetails", "Admin", new { id = a.ApplicationID })">View</a></td>
                     </tr>
                 }
-            </tbody>
-        </table>
-    </div>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        No applications found.
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
 </div>

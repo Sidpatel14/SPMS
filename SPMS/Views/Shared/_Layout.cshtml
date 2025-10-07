@@ -12,6 +12,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
         body {
             background-color: #f5f6fa;
             font-family: 'Segoe UI', sans-serif;
@@ -41,22 +48,47 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        .stat-card {
-            transition: transform 0.2s ease;
+        .container {
+            flex: 1; /* pushes footer to bottom */
         }
-
-            .stat-card:hover {
-                transform: translateY(-3px);
-            }
 
         footer {
             background: #1e1e2f;
             color: #aaa;
             font-size: 14px;
             padding: 15px 0;
-            margin-top: 100px;
             text-align: center;
+            position: relative;
+            bottom: 0;
+            width: 100%;
         }
+
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            }
+
+            .stat-card i {
+                opacity: 0.9;
+            }
+
+            .stat-card h6 {
+                font-size: 15px;
+                margin-bottom: 5px;
+                letter-spacing: 0.5px;
+            }
+
+            .stat-card h2 {
+                font-size: 28px;
+                margin: 0;
+            }
+
     </style>
 </head>
 <body>

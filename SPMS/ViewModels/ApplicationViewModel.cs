@@ -1,12 +1,24 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
+
+public class ApplicationsFilterViewModel
+{
+    public string SelectedStatus { get; set; }
+    public List<SelectListItem> StatusList { get; set; } = new();
+    public List<ApplicationViewModel> Applications { get; set; } = new();
+    public string Search { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+}
+
 public class ApplicationViewModel
 {
-    public int ApplicationId { get; set; }
-
-    public int UserId { get; set; }
+    public Int64 ApplicationId { get; set; }
+    public string ReferenceNumber { get; set; } = null!;
+    public Int64 UserId { get; set; }
 
     public string PermitType { get; set; } = null!;
 
@@ -16,7 +28,7 @@ public class ApplicationViewModel
 
     public DateTime? LastUpdated { get; set; }
 
-    public int? StaffId { get; set; }
+    public Int64? StaffId { get; set; }
 
     public string? Comments { get; set; }
     public string Address1 { get; set; } = null!;

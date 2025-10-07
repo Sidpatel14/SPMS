@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<ApplicationViewModel>
+
+@{
     ViewBag.Title = "My Applications";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -9,30 +11,30 @@
         <a href="@Url.Action("Apply", "Citizen")" class="btn btn-primary">+ Apply for New Permit</a>
     </div>
 
-    <!-- Filter/Search Bar -->
+    <!-- Filter Bar -->
     <div class="card p-3 shadow-sm mb-4">
-        <form method="get" action="@Url.Action("MyApplications", "Citizen")" class="row g-3">
+        <form method="get" class="row g-3">
             <div class="col-md-3">
-                <label for="Search" class="form-label">Search by ID or Type</label>
-                <input type="text" class="form-control" id="Search" name="search" placeholder="e.g. APP-001 or Trade" />
+                <label class="form-label">Search by ID or Type</label>
+                <input type="text" class="form-control" name="search" value="@Context.Request.Query["search"]" placeholder="e.g. APP-001" />
             </div>
             <div class="col-md-3">
-                <label for="Status" class="form-label">Status</label>
-                <select class="form-select" id="Status" name="status">
-                    <option value="">All</option>
-                    <option>Pending</option>
-                    <option>Approved</option>
-                    <option>Rejected</option>
-                    <option>Draft</option>
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["status"]) ? "selected" : null)">All</option>
+                    <option value="Submitted" selected="@(Context.Request.Query["status"] == "Submitted" ? "selected" : null)">Submitted</option>
+                    <option value="Under Review" selected="@(Context.Request.Query["status"] == "Under Review" ? "selected" : null)">Under Review</option>
+                    <option value="Approved" selected="@(Context.Request.Query["status"] == "Approved" ? "selected" : null)">Approved</option>
+                    <option value="Rejected" selected="@(Context.Request.Query["status"] == "Rejected" ? "selected" : null)">Rejected</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <label for="FromDate" class="form-label">From Date</label>
-                <input type="date" class="form-control" id="FromDate" name="fromDate" />
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" name="fromDate" value="@Context.Request.Query["fromDate"]" />
             </div>
             <div class="col-md-3">
-                <label for="ToDate" class="form-label">To Date</label>
-                <input type="date" class="form-control" id="ToDate" name="toDate" />
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" name="toDate" value="@Context.Request.Query["toDate"]" />
             </div>
 
             <div class="col-12 text-end">
@@ -42,7 +44,7 @@
         </form>
     </div>
 
-    <!-- Applications Table -->
+    <!-- Table -->
     <div class="card p-4 shadow-sm">
         <h5 class="mb-3">Your Submitted Applications</h5>
         <div class="table-responsive">
@@ -58,39 +60,48 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#APP-001</td>
-                        <td>Building Permit</td>
-                        <td><span class="badge bg-warning text-dark">Pending</span></td>
-                        <td>2025-09-20</td>
-                        <td>2025-09-25</td>
-                        <td>
-                            <a href="@Url.Action("Details", "Citizen", new { id = 1 })" class="btn btn-sm btn-primary">View</a>
-                            <a href="#" class="btn btn-sm btn-outline-danger">Cancel</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>#APP-002</td>
-                        <td>Event Permit</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                        <td>2025-09-10</td>
-                        <td>2025-09-18</td>
-                        <td>
-                            <a href="@Url.Action("Details", "Citizen", new { id = 2 })" class="btn btn-sm btn-primary">View</a>
-                            <a href="#" class="btn btn-sm btn-outline-success">Download</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>#APP-003</td>
-                        <td>Trade License</td>
-                        <td><span class="badge bg-danger">Rejected</span></td>
-                        <td>2025-09-05</td>
-                        <td>2025-09-12</td>
-                        <td>
-                            <a href="@Url.Action("Details", "Citizen", new { id = 3 })" class="btn btn-sm btn-primary">View</a>
-                            <a href="#" class="btn btn-sm btn-outline-warning">Resubmit</a>
-                        </td>
-                    </tr>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var app in Model)
+                        {
+                            string badgeClass = app.Status switch
+                            {
+                                "Submitted" => "bg-warning text-dark",
+                                "Approved" => "bg-success text-dark",
+                                "Rejected" => "bg-danger text-dark",
+                                "Under Review" => "bg-info text-dark",
+                                _ => "bg-light text-dark"
+                            };
+                            <tr>
+                                <td>@app.ReferenceNumber</td>
+                                <td>@app.PermitType</td>
+                                <td><span class="badge @badgeClass">@app.Status</span></td>
+                                <td>@app.SubmissionDate?.ToString("yyyy-MM-dd")</td>
+                                <td>@app.LastUpdated?.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <a href="@Url.Action("ApplicationDetail", "Citizen", new { id = app.ApplicationId })" class="btn btn-sm btn-primary">View</a>
+                                    @if (app.Status == "Submitted")
+                                    {
+                                        <a href="#" class="btn btn-sm btn-outline-danger">Cancel</a>
+                                    }
+                                    else if (app.Status == "Approved")
+                                    {
+                                        <a href="#" class="btn btn-sm btn-outline-success">Download</a>
+                                    }
+                                    else if (app.Status == "Rejected")
+                                    {
+                                        <a href="#" class="btn btn-sm btn-outline-warning">Resubmit</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No applications found.</td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

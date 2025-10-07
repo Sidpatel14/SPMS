@@ -1,182 +1,104 @@
 ﻿@model StaffViewModel
 @{
-    ViewBag.Title = "Dashboard";
+    ViewBag.Title = "Staff Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f5f7fa;
-        margin: 0;
-        padding: 0;
-    }
-
-    h2 {
-        font-size: 28px;
-        font-weight: 600;
-        margin-bottom: 25px;
-        color: #333;
-    }
-
-    /* Dashboard container */
-    .row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        margin-top: 20px;
-    }
-
-    .col-md-2 {
-        flex: 1;
-        min-width: 180px;
-    }
-
-    /* Card styles */
-    .card {
-        border: none;
-        border-radius: 14px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        cursor: pointer;
-    }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-        }
-
-    .card-body {
-        padding: 30px 20px;
-    }
-
-        .card-body h3 {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0;
-            margin-bottom: 8px;
-        }
-
-        .card-body p {
-            font-size: 16px;
-            margin: 0;
-            opacity: 0.9;
-        }
-
-    /* Color tweaks for better contrast */
-    .bg-primary {
-        background: #007bff;
-    }
-
-    .bg-warning {
-        background: #ff9800;
-    }
-
-    .bg-info {
-        background: #17a2b8;
-    }
-
-    .bg-success {
-        background: #28a745;
-    }
-
-    .bg-danger {
-        background: #dc3545;
-    }
-
-    .text-white {
-        color: #fff;
-    }
-
-    /* Responsive adjustments */
-    @@media (max-width: 768px) {
-        .row
-
-    {
-        flex-direction: column;
-    }
-
-    .col-md-2 {
-        min-width: 100%;
-    }
-
-    }
-</style>
-
-
-<h2>Welcome, @Context.Session.GetString("FullName")</h2>
-
-<div class="row">
-    <div class="col-md-2">
-        <div class="card text-center bg-primary text-white">
-            <div class="card-body">
-                <h3>@Model.TotalApplications</h3>
-                <p>Total Applications</p>
-            </div>
+<div class="row g-3 mb-4 text-center">
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-white shadow-sm">
+            <i class="fa fa-folder-open fa-2x text-primary mb-2"></i>
+            <h6>Total Applications</h6>
+            <h2 class="fw-bold">@Model.TotalApplications</h2>
         </div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-center bg-warning text-white">
-            <div class="card-body">
-                <h3>@Model.Submitted</h3>
-                <p>Pending Applications</p>
-            </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-warning text-white shadow-sm">
+            <i class="fa fa-upload fa-2x mb-2"></i>
+            <h6>Submitted</h6>
+            <h2 class="fw-bold">@Model.Submitted</h2>
         </div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-center bg-info text-white">
-            <div class="card-body">
-                <h3>@Model.UnderReview</h3>
-                <p>Under Review</p>
-            </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-info text-white shadow-sm">
+            <i class="fa fa-spinner fa-2x mb-2"></i>
+            <h6>Under Review</h6>
+            <h2 class="fw-bold">@Model.UnderReview</h2>
         </div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-center bg-success text-white">
-            <div class="card-body">
-                <h3>@Model.Approved</h3>
-                <p>Approved</p>
-            </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-success text-white shadow-sm">
+            <i class="fa fa-check-circle fa-2x mb-2"></i>
+            <h6>Approved</h6>
+            <h2 class="fw-bold">@Model.Approved</h2>
         </div>
     </div>
-    <div class="col-md-2">
-        <div class="card text-center bg-danger text-white">
-            <div class="card-body">
-                <h3>@Model.Rejected</h3>
-                <p>Rejected</p>
-            </div>
+    <div class="col-md">
+        <div class="card stat-card p-4 bg-danger text-white shadow-sm">
+            <i class="fa fa-times-circle fa-2x mb-2"></i>
+            <h6>Rejected</h6>
+            <h2 class="fw-bold">@Model.Rejected</h2>
         </div>
     </div>
 </div>
-<div class="container mt-4">
-    <h2>Latest Applications</h2>
-    <table class="table table-bordered table-hover">
+
+<div class="card p-4">
+    <h5 class="mb-3">Recent Applications</h5>
+    <table class="table table-hover align-middle">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Citizen Name</th>
                 <th>Permit Type</th>
                 <th>Status</th>
-                <th>Submitted</th>
-                <th>Location</th>
+                <th>Submitted On</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var app in Model.LatestApplications)
+            @if (Model.LatestApplications != null && Model.LatestApplications.Any())
+            {
+                @foreach (var a in Model.LatestApplications)
+                {
+                    <tr>
+                        <td>@a.ApplicationID</td>
+                        <td>@a.CitizenName</td>
+                        <td>@a.PermitType</td>
+                        @if (a.PermitType == "Submitted")
+                        {
+                            <td><span class="badge bg-warning">@a.PermitType</span></td>
+                        }
+                        else if (a.PermitType == "Under Review")
+                        {
+                            <td><span class="badge bg-info">@a.PermitType</span></td>
+                        }
+                        else if (a.PermitType == "Approved")
+                        {
+                            <td><span class="badge bg-success">@a.PermitType</span></td>
+                        }
+                        else if (a.PermitType == "Rejected")
+                        {
+                            <td><span class="badge bg-danger">@a.PermitType</span></td>
+                        }
+                        else
+                        {
+                            <td><span class="badge bg-light">@a.PermitType</span></td>
+                        }
+                        <td>@a.Status</td>
+                        <td>@a.SubmissionDate.ToString("yyyy-MM-dd")</td>
+                        <td><a class="btn btn-sm btn-primary" href="@Url.Action("ApplicationDetails", "Admin", new { id = a.ApplicationID })">View</a></td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td>@app.ApplicationID</td>
-                    <td>@app.CitizenName</td>
-                    <td>@app.PermitType</td>
-                    <td>@app.Status</td>
-                    <td>@app.SubmissionDate</td>
-                    <td>@app.State, @app.Country</td>
-                    <td>
-                        <a class="btn btn-sm btn-primary" href="/Staff/Details/@app.ApplicationID">Review</a>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        No applications found.
                     </td>
                 </tr>
             }
         </tbody>
+
     </table>
 </div>

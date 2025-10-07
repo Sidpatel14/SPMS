@@ -9,98 +9,68 @@ namespace SPMS.Controllers
     public class StaffController : BaseController
     {
         private readonly SpmsContext _db;
+        private readonly string connectionString;
+
         public StaffController(SpmsContext context)
         {
             _db = context;
-
+            connectionString = _db.Database.GetDbConnection().ConnectionString;
         }
         // Staff Dashboard - show all pending or under-review applications
-        public IActionResult Dashboard()
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
         {
             var userId = HttpContext.Session.GetString("UserID");
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login", "Account");
+
             var role = HttpContext.Session.GetString("Role");
             if (role != "Staff")
                 return RedirectToAction("AccessDenied", "Account");
 
             List<StaffViewModel> applications = new();
-            string connectionString = _db.Database.GetDbConnection().ConnectionString;
-
             var model = new StaffViewModel();
+            model.LatestApplications = new List<StaffAppRow>();
 
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = _db.Database.GetDbConnection())
             {
-                conn.Open();
-
-                // Counts
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                      (SELECT COUNT(1) FROM Applications) AS TotalApps,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Submitted') AS Submitted,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Under Review') AS UnderReview,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Approved') AS Approved,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Rejected') AS Rejected
-                    ", conn))
+                await conn.OpenAsync();
+                using (var cmd = conn.CreateCommand())
                 {
-                    using var r = cmd.ExecuteReader();
-                    if (r.Read())
-                    {
-                        model.TotalApplications = Convert.ToInt32(r["TotalApps"]);
-                        model.Submitted = Convert.ToInt32(r["Submitted"]);
-                        model.UnderReview = Convert.ToInt32(r["UnderReview"]);
-                        model.Approved = Convert.ToInt32(r["Approved"]);
-                        model.Rejected = Convert.ToInt32(r["Rejected"]);
-                    }
-                }
+                    cmd.CommandText = "sp_CitizenDashboard";
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add(new SqlParameter("@CitizenID", userId));
 
-                // Latest 8 applications
-                using (var cmd = new SqlCommand(@"
-                    SELECT TOP 8 A.ApplicationID, A.PermitType, A.Status, A.SubmissionDate,
-                           U.FirstName + ' ' + U.LastName AS CitizenName
-                    FROM Applications A
-                    INNER JOIN Users U ON A.UserID = U.UserID
-                    ORDER BY A.SubmissionDate DESC", conn))
-                {
-                    using var r = cmd.ExecuteReader();
-                    while (r.Read())
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        model.LatestApplications.Add(new StaffAppRow
+                        if (await reader.ReadAsync())
                         {
-                            ApplicationID = Convert.ToInt32(r["ApplicationID"]),
-                            PermitType = r["PermitType"]?.ToString() ?? string.Empty,
-                            Status = r["Status"].ToString() ?? string.Empty,
-                            SubmissionDate = Convert.ToDateTime(r["SubmissionDate"]),
-                            CitizenName = r["CitizenName"].ToString() ?? string.Empty
-                        });
+                            model.TotalApplications = reader.GetInt64(0);
+                            model.Submitted = reader.GetInt64(1);
+                            model.UnderReview = reader.GetInt64(2);
+                            model.Approved = reader.GetInt64(3);
+                            model.Rejected = reader.GetInt64(4);
+                        }
+
+                        if (await reader.NextResultAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                model.LatestApplications.Add(new StaffAppRow
+                                {
+                                    ApplicationID = reader.GetInt64(0),
+                                    CitizenName = reader.GetString(1),
+                                    PermitType = reader.GetString(2),
+                                    Status = reader.GetString(3),
+                                    SubmissionDate = reader.GetDateTime(4)
+                                });
+                            }
+                        }
                     }
                 }
             }
 
-            //using (SqlConnection con = new SqlConnection(connectionString))
-            //{
-            //    con.Open();
-            //    SqlCommand cmd = new SqlCommand(@"
-            //    SELECT A.ApplicationID, A.PermitType, A.Status, A.SubmissionDate, 
-            //           U.FirstName + ' ' + U.LastName AS CitizenName, A.Address1, A.State, A.Country
-            //    FROM Applications A
-            //    INNER JOIN Users U ON A.UserID = U.UserID
-            //    WHERE A.Status IN ('Submitted', 'Under Review', 'MoreInfoRequired')", con);
 
-            //    SqlDataReader dr = cmd.ExecuteReader();
-            //    while (dr.Read())
-            //    {
-            //        applications.Add(new StaffViewModel
-            //        {
-            //            ApplicationId = Convert.ToInt32(dr["ApplicationID"]),
-            //            CitizenName = dr["CitizenName"].ToString(),
-            //            PermitType = dr["PermitType"]?.ToString() ?? string.Empty,
-            //            Status = dr["Status"].ToString(),
-            //            SubmissionDate = Convert.ToDateTime(dr["SubmissionDate"]),
-            //            Address1 = dr["Address1"]?.ToString() ?? string.Empty,
-            //            State = dr["State"]?.ToString() ?? string.Empty,
-            //            Country = dr["Country"]?.ToString() ?? string.Empty,
-            //        });
-            //    }
-            //}
             return View(model);
         }
 
@@ -108,7 +78,6 @@ namespace SPMS.Controllers
         public IActionResult Details(int id)
         {
             ApplicationViewModel app = new ApplicationViewModel();
-            string connectionString = _db.Database.GetDbConnection().ConnectionString;
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
@@ -146,7 +115,6 @@ namespace SPMS.Controllers
         public IActionResult UpdateStatus(int applicationId, string status, string comments)
         {
             int staffId = Convert.ToInt32(HttpContext.Session.GetString("UserID"));
-            string connectionString = _db.Database.GetDbConnection().ConnectionString;
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();

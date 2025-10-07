@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SPMS.Models;
+using System.Data;
 using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Data.SqlClient;
 
 namespace SPMS.Controllers
 {
@@ -17,7 +18,7 @@ namespace SPMS.Controllers
         public AdminController(SpmsContext context)
         {
             _db = context;
-             connectionString = _db.Database.GetDbConnection().ConnectionString;
+            connectionString = _db.Database.GetDbConnection().ConnectionString;
         }
 
         [HttpGet]
@@ -41,7 +42,6 @@ namespace SPMS.Controllers
             string randomPassword = GenerateRandomPassword(10);
             string hashedPassword = HashPassword(randomPassword);
             model.Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
-            string connectionString = _db.Database.GetDbConnection().ConnectionString;
             if (ModelState.IsValid)
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -126,61 +126,55 @@ namespace SPMS.Controllers
         }
 
         // Dashboard: counts + latest applications
-        public IActionResult Dashboard()
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
         {
-            //var reject = RequireAdmin();
-            //if (reject != null) return reject;
             var userId = HttpContext.Session.GetString("UserID");
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login", "Account");
+
             var role = HttpContext.Session.GetString("Role");
             if (role != "Admin")
                 return RedirectToAction("AccessDenied", "Account");
 
+            List<AdminDashboardViewModel> applications = new();
             var model = new AdminDashboardViewModel();
+            model.LatestApplications = new List<AdminAppRow>();
 
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = _db.Database.GetDbConnection())
             {
-                conn.Open();
-
-                // Counts
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                      (SELECT COUNT(1) FROM Applications) AS TotalApps,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Submitted') AS Submitted,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Under Review') AS UnderReview,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Approved') AS Approved,
-                      (SELECT COUNT(1) FROM Applications WHERE Status = 'Rejected') AS Rejected
-                    ", conn))
+                await conn.OpenAsync();
+                using (var cmd = conn.CreateCommand())
                 {
-                    using var r = cmd.ExecuteReader();
-                    if (r.Read())
-                    {
-                        model.TotalApplications = Convert.ToInt32(r["TotalApps"]);
-                        model.Submitted = Convert.ToInt32(r["Submitted"]);
-                        model.UnderReview = Convert.ToInt32(r["UnderReview"]);
-                        model.Approved = Convert.ToInt32(r["Approved"]);
-                        model.Rejected = Convert.ToInt32(r["Rejected"]);
-                    }
-                }
+                    cmd.CommandText = "sp_AdminDashboardApplications";
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add(new SqlParameter("@CitizenID", userId));
 
-                // Latest 8 applications
-                using (var cmd = new SqlCommand(@"
-                    SELECT TOP 8 A.ApplicationID, A.PermitType, A.Status, A.SubmissionDate,
-                           U.FirstName + ' ' + U.LastName AS CitizenName
-                    FROM Applications A
-                    INNER JOIN Users U ON A.UserID = U.UserID
-                    ORDER BY A.SubmissionDate DESC", conn))
-                {
-                    using var r = cmd.ExecuteReader();
-                    while (r.Read())
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        model.LatestApplications.Add(new AdminAppRow
+                        if (await reader.ReadAsync())
                         {
-                            ApplicationID = Convert.ToInt32(r["ApplicationID"]),
-                            PermitType = r["PermitType"].ToString() ?? string.Empty,
-                            Status = r["Status"].ToString() ?? string.Empty,
-                            SubmissionDate = Convert.ToDateTime(r["SubmissionDate"]),
-                            CitizenName = r["CitizenName"].ToString() ?? string.Empty
-                        });
+                            model.TotalApplications = reader.GetInt64(0);
+                            model.Submitted = reader.GetInt64(1);
+                            model.UnderReview = reader.GetInt64(2);
+                            model.Approved = reader.GetInt64(3);
+                            model.Rejected = reader.GetInt64(4);
+                        }
+
+                        if (await reader.NextResultAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                model.LatestApplications.Add(new AdminAppRow
+                                {
+                                    ApplicationID = reader.GetInt64(0),
+                                    CitizenName = reader.GetString(1),
+                                    PermitType = reader.GetString(2),
+                                    Status = reader.GetString(3),
+                                    SubmissionDate = reader.GetDateTime(4)
+                                });
+                            }
+                        }
                     }
                 }
             }

@@ -1,16 +1,16 @@
 ﻿public class AdminDashboardViewModel
 {
-    public int TotalApplications { get; set; }
-    public int Submitted { get; set; }
-    public int UnderReview { get; set; }
-    public int Approved { get; set; }
-    public int Rejected { get; set; }
+    public Int64 TotalApplications { get; set; }
+    public Int64 Submitted { get; set; }
+    public Int64 UnderReview { get; set; }
+    public Int64 Approved { get; set; }
+    public Int64 Rejected { get; set; }
     public List<AdminAppRow> LatestApplications { get; set; } = new();
 }
 
 public class AdminAppRow
 {
-    public int ApplicationID { get; set; }
+    public Int64 ApplicationID { get; set; }
     public string CitizenName { get; set; } = null!;
     public string PermitType { get; set; } = null!;
     public string Status { get; set; } = null!;

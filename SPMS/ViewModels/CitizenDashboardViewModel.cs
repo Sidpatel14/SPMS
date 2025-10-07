@@ -1,17 +1,17 @@
-﻿public class StaffViewModel
+﻿public class CitizenDashboardViewModel
 {
     public Int64 TotalApplications { get; set; }
     public Int64 Submitted { get; set; }
     public Int64 UnderReview { get; set; }
     public Int64 Approved { get; set; }
     public Int64 Rejected { get; set; }
-    public List<StaffAppRow> LatestApplications { get; set; } = new();
+    public List<CitizenAppRow> LatestApplications { get; set; } = new();
 }
 
-public class StaffAppRow
+public class CitizenAppRow
 {
     public Int64 ApplicationID { get; set; }
-    public string CitizenName { get; set; } = null!;
+    public string ReferenceNumber { get; set; } = null!;
     public string PermitType { get; set; } = null!;
     public string Status { get; set; } = null!;
     public DateTime SubmissionDate { get; set; }

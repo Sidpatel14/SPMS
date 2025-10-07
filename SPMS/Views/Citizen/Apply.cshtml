@@ -5,32 +5,31 @@
 
 <style>
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
         background-color: #f4f6f8;
     }
 
     .container {
-        max-width: 750px;
-        margin: 60px auto;
-        padding: 0 15px;
+        max-width: 700px;
+        padding: 0px 20px;
     }
 
     .card {
-        background: linear-gradient(145deg, #ffffff, #f7f9fc);
-        border-radius: 15px;
-        padding: 40px 30px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #fff;
+        border-radius: 16px;
+        padding: 35px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
         }
 
         .card h3 {
             text-align: center;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 600;
             margin-bottom: 30px;
             color: #222;
@@ -38,18 +37,19 @@
 
     h5 {
         font-size: 18px;
+        font-weight: 600;
         margin-bottom: 20px;
         color: #333;
     }
 
     .input-icon {
         position: relative;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
 
         .input-icon i {
             position: absolute;
-            left: 12px;
+            left: 14px;
             top: 50%;
             transform: translateY(-50%);
             color: #aaa;
@@ -58,41 +58,44 @@
 
     input, select, textarea {
         width: 100%;
-        padding: 10px 15px 10px 40px;
+        padding: 12px 15px 12px 40px;
         border-radius: 10px;
-        border: 1px solid #ddd;
-        transition: all 0.3s ease;
-        background-color: #fff;
+        border: 1px solid #ccc;
+        background: #fff;
+        transition: all 0.2s ease;
+        font-size: 15px;
     }
 
         input:focus, select:focus, textarea:focus {
             border-color: #007bff;
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+            box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
             outline: none;
         }
 
-    button {
-        font-weight: 500;
-        border-radius: 10px;
-        padding: 12px 25px;
-        font-size: 16px;
-        transition: all 0.2s ease;
+    textarea {
+        resize: vertical;
     }
 
     .btn-primary {
-        background: linear-gradient(to right, #007bff, #0056b3);
+        background: linear-gradient(90deg, #007bff, #0056b3);
         color: #fff;
         border: none;
+        font-weight: 500;
+        padding: 12px 24px;
+        border-radius: 10px;
+        transition: background 0.2s;
     }
 
         .btn-primary:hover {
-            background: linear-gradient(to right, #0056b3, #003f7f);
+            background: linear-gradient(90deg, #0056b3, #00408c);
         }
 
     .btn-secondary {
         background: #6c757d;
         color: #fff;
         border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
     }
 
         .btn-secondary:hover {
@@ -102,7 +105,16 @@
     .form-text {
         font-size: 13px;
         color: #666;
-        margin-bottom: 10px;
+        margin-top: 5px;
+    }
+
+    .row > .col-md-4,
+    .row > .col-md-6 {
+        margin-bottom: 20px;
+    }
+
+    hr {
+        margin: 30px 0;
     }
 
     @@media (max-width: 576px) {
@@ -119,7 +131,6 @@
 
     }
 </style>
-
 <div class="container">
     <div class="card">
         <h3>Apply for New Permit</h3>
@@ -127,7 +138,8 @@
         <form method="post" enctype="multipart/form-data" action="@Url.Action("Apply", "Citizen")">
 
             <h5>Permit Details</h5>
-            <div class="input-icon">        
+            <div class="input-icon">
+                
                 <select name="PermitType" class="form-select" required>
                     <option value="">Select Permit Type</option>
                     @foreach (var type in ViewBag.PermitTypes)
@@ -155,12 +167,13 @@
             <div class="row">
                 <div class="col-md-4">
                     <div class="input-icon">
+                        <i class="fa fa-city"></i>
                         <input type="text" name="Town" placeholder="Town" required />
                     </div>
                 </div>
-
                 <div class="col-md-4">
                     <div class="input-icon">
+                        @* <i class="fa fa-flag"></i> *@
                         <select id="Country" name="Country" class="form-select" required>
                             <option value="">--Select Country--</option>
                         </select>
@@ -168,6 +181,7 @@
                 </div>
                 <div class="col-md-4" id="StateContainer">
                     <div class="input-icon">
+                        @* <i class="fa fa-map"></i> *@
                         <select id="State" name="State" class="form-select" required>
                             <option value="">--Select State--</option>
                         </select>
@@ -183,19 +197,25 @@
             <hr />
 
             <h5>Upload Required Documents</h5>
-            <input type="file" name="doc" multiple />
+            <div class="input-icon">
+                <i class="fa fa-upload"></i>
+                <input type="file" name="doc" id="fileInput" multiple />
+            </div>
+            <div id="fileErrors" style="color:red"></div>
             <div class="form-text">Supported: PDF, JPG, PNG. Max 5MB each.</div>
 
             <hr />
 
             <div class="d-flex justify-content-between">
                 <button type="reset" class="btn btn-secondary">Clear Form</button>
-                <button type="submit" class="btn btn-primary">Submit Application</button>
+                <button id="Submit" type="submit" class="btn btn-primary">Submit Application</button>
             </div>
-
         </form>
     </div>
 </div>
+
+
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <script>
@@ -219,7 +239,7 @@
                     // If states exist, show dropdown
                     var $select = $('<select id="State" name="State" class="form-select" required><option value="">--Select State--</option></select>');
                     $.each(data, function (i, state) {
-                        $select.append('<option value="' + state.stateName + '">' + state.stateName + '</option>');
+                        $select.append('<option value="' + state.stateID + '">' + state.stateName + '</option>');
                     });
                     $stateContainer.append($select);
                 } else {
@@ -231,4 +251,27 @@
         });
 
     });
+
+    const allowedExtensions = ['pdf','jpg','jpeg','png'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        const errors = [];
+        const files = this.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(ext)) {
+                errors.push(`${file.name}: Invalid file type`);
+            }
+            if (file.size > maxSize) {
+                errors.push(`${file.name}: File exceeds 5MB`);
+            }
+        }
+       
+        Submit.disabled = errors.length === 1;
+        document.getElementById('fileErrors').innerHTML = errors.join('<br>');
+    });
+
 </script>

@@ -360,7 +360,7 @@
                     // If states exist, show dropdown
                     var $select = $('<select id="State" name="State" class="form-control" required><option value="">--Select State--</option></select>');
                     $.each(data, function (i, state) {
-                        $select.append('<option value="' + state.stateName + '">' + state.stateName + '</option>');
+                        $select.append('<option value="' + state.stateID + '">' + state.stateName + '</option>');
                     });
                     $stateContainer.append($select);
                 } else {
