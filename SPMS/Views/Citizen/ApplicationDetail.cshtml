@@ -8,9 +8,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Application Details</h3>
         <div>
-            <a href="@Url.Action("Edit", "Application", new { id = Model.ApplicationNumber })" class="btn btn-primary btn-sm">Edit</a>
-            <a href="@Url.Action("Download", "Application", new { id = Model.ApplicationNumber })" class="btn btn-success btn-sm">Download</a>
-            <a href="@Url.Action("Index", "Application")" class="btn btn-secondary btn-sm">Back</a>
+            @if (Model.Status == "Submitted")
+            {
+                <a href="@Url.Action("Apply", "Citizen", new { ApplicationId = Model.ApplicationId })" class="btn btn-primary btn-sm">Edit</a>
+            } 
+            <a href="@Url.Action("Download", "Application", new { id = Model.ApplicationId })" class="btn btn-success btn-sm">Download</a>
+            <a href="@Url.Action("Dashboard", "Citizen")" class="btn btn-secondary btn-sm">Back</a>
         </div>
     </div>
 
@@ -21,10 +24,10 @@
                 <div class="col-md-6 mb-2"><strong>Application Number:</strong> @Model.ApplicationNumber</div>
                 <div class="col-md-6 mb-2"><strong>Permission Type:</strong> @Model.PermissionType</div>
                 <div class="col-md-6 mb-2"><strong>Status:</strong> @Model.Status</div>
-                <div class="col-md-6 mb-2"><strong>Submitted Date:</strong> @Model.SubmittedDate.ToString("dd MMM yyyy")</div>
+                <div class="col-md-6 mb-2"><strong>Submitted Date:</strong> @Model.SubmittedDate.ToString("dd MMM yyyy  HH:mm")</div>
                 <div class="col-md-6 mb-2"><strong>Last Updated:</strong> @Model.LastUpdated.ToString("dd MMM yyyy HH:mm")</div>
-                <div class="col-md-12 mb-2"><strong>Full Address:</strong> @Model.FullAddress</div>
-                <div class="col-md-12 mb-2"><strong>Comment:</strong> @Model.Comment</div>
+                <div class="col-md-12 mb-2"><strong>Address:</strong> @Model.Address1  @Model.Address2 @Model.Town @Model.State @Model.Country</div>
+                <div class="col-md-12 mb-2"><strong>Project Description:</strong> @Model.Comment</div>
             </div>
         </div>
     </div>

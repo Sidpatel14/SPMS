@@ -1,4 +1,5 @@
-﻿@{
+﻿@model ApplicationViewModel
+@{
     ViewBag.Title = "Apply for Permit";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -56,21 +57,22 @@
             font-size: 16px;
         }
 
-    input, select, textarea {
-        width: 100%;
-        padding: 12px 15px 12px 40px;
-        border-radius: 10px;
-        border: 1px solid #ccc;
-        background: #fff;
-        transition: all 0.2s ease;
-        font-size: 15px;
+    input, select, textarea, form-select {
+        width: 100%!important;
+        padding: 12px 15px 12px 40px !important;
+        border-radius: 10px !important;
+        border: 1px solid #ccc !important;
+        background: #fff !important;
+        transition: all 0.2s ease !important;
+        font-size: 15px !important;
     }
 
-        input:focus, select:focus, textarea:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
-            outline: none;
+        input:focus, select:focus, textarea:focus, form-select:focus {
+            border-color: #007bff !important;
+            box-shadow: 0 0 6px rgba(0, 123, 255, 0.2) !important;
+            outline: none !important;
         }
+
 
     textarea {
         resize: vertical;
@@ -108,6 +110,8 @@
         margin-top: 5px;
     }
 
+    
+
     .row > .col-md-4,
     .row > .col-md-6 {
         margin-bottom: 20px;
@@ -118,99 +122,260 @@
     }
 
     @@media (max-width: 576px) {
-        .d-flex
+        .d-flex {
+            flex-direction: column;
+        }
 
-    {
-        flex-direction: column;
-    }
-
-    .d-flex button {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
+            .d-flex button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
     }
 </style>
 <div class="container">
     <div class="card">
-        <h3>Apply for New Permit</h3>
 
-        <form method="post" enctype="multipart/form-data" action="@Url.Action("Apply", "Citizen")">
+        @if (@Model == null)
+        {
+            <h3>Apply for New Permit</h3>
 
-            <h5>Permit Details</h5>
-            <div class="input-icon">
-                
-                <select name="PermitType" class="form-select" required>
-                    <option value="">Select Permit Type</option>
-                    @foreach (var type in ViewBag.PermitTypes)
-                    {
-                        <option value="@type.PermitTypeId">@type.Name</option>
-                    }
-                </select>
-            </div>
+            <form method="post" enctype="multipart/form-data" action="@Url.Action("Apply", "Citizen")">
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="input-icon">
-                        <i class="fa fa-map-marker-alt"></i>
-                        <input type="text" name="Address1" placeholder="Address 1" required />
+                <h5>Permit Details</h5>
+                <div class="input-icon">
+                    <i class="fa fa-file-alt"></i>
+                    <select name="PermitType" class="form-select" required>
+                        <option value="">Select Permit Type</option>
+                        @foreach (var type in ViewBag.PermitTypes)
+                        {
+                            <option value="@type.PermitTypeId">@type.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-icon">
+                            <i class="fa fa-map-marker-alt"></i>
+                            <input type="text" name="Address1" placeholder="Address 1" required />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-icon">
+                            <i class="fa fa-map-marker-alt"></i>
+                            <input type="text" name="Address2" placeholder="Address 2" />
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="input-icon">
-                        <i class="fa fa-map-marker-alt"></i>
-                        <input type="text" name="Address2" placeholder="Address 2" />
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-icon">
+                            <i class="fa fa-city"></i>
+                            <input type="text" name="Town" placeholder="Town" required />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-icon">
+                            <i class="fa fa-flag"></i>
+                            <select id="Country" name="Country" class="form-select" required>
+                                <option value="">--Select Country--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="StateContainer">
+                        <div class="input-icon">
+                            <i class="fa fa-map"></i>
+                            <select id="State" name="State" class="form-select" required>
+                                <option value="">--Select State--</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="input-icon">
-                        <i class="fa fa-city"></i>
-                        <input type="text" name="Town" placeholder="Town" required />
+                <div class="input-icon">
+                    <i class="fa fa-align-left"></i>
+                    <textarea name="Comments" rows="4" placeholder="Project Description" required></textarea>
+                </div>
+
+                <hr />
+
+                <h5>Upload Required Documents</h5>
+                <div class="input-icon">
+                    <i class="fa fa-upload"></i>
+                    <input type="file" name="doc" id="fileInput" multiple />
+                </div>
+                <div id="fileErrors" style="color:red"></div>
+                <div class="form-text">Supported: PDF, JPG, PNG. Max 5MB each.</div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+                    <button type="reset" class="btn btn-secondary">Clear Form</button>
+                    <button id="Submit" type="submit" class="btn btn-primary">Submit Application</button>
+                </div>
+            </form>
+        }
+        else
+        {
+            <h3>Update Permit @Model.ReferenceNumber </h3>
+
+            <form method="post" enctype="multipart/form-data" action="@Url.Action("Apply", "Citizen")">
+                <input type="hidden" name="ApplicationID" id="ApplicationID" value="@Model.ApplicationId" />
+                <input type="hidden" name="PermitTypeID" id="PermitTypeID" value="@Model.PermitTypeID" />
+                <input type="hidden" name="CountryId" id="CountryId" value="@Model.CountryId" />
+                <input type="hidden" name="StateId" id="StateId" value="@Model.PermitTypeID" />
+                <input type="hidden" name="ReferenceNumber" id="ReferenceNumber" value="@Model.ReferenceNumber" />
+                <h5>Permit Details</h5>
+                <div class="input-icon">
+                    <i class="fa fa-file-alt"></i>
+                    <select name="PermitType" class="form-select" required>
+                        <option value="">Select Permit Type</option>
+                        @foreach (var type in ViewBag.PermitTypes)
+                        {
+                            var isSelected = Model.PermitTypeID == type.PermitTypeId;
+                            if (isSelected)
+                            {
+                                <option value="@type.PermitTypeId" selected>@type.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@type.PermitTypeId">@type.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-icon">
+                            <i class="fa fa-map-marker-alt"></i>
+                            <input type="text" name="Address1" placeholder="Address 1" value="@Model.Address1" required />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-icon">
+                            <i class="fa fa-map-marker-alt"></i>
+                            <input type="text" name="Address2" placeholder="Address 2" value="@Model.Address2" />
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="input-icon">
-                        @* <i class="fa fa-flag"></i> *@
-                        <select id="Country" name="Country" class="form-select" required>
-                            <option value="">--Select Country--</option>
-                        </select>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-icon">
+                            <i class="fa fa-city"></i>
+                            <input type="text" name="Town" placeholder="Town" value="@Model.Town" required />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="input-icon">
+                            <i class="fa fa-flag"></i>
+                            <select id="Country" name="Country" class="form-select" required>
+                                <option value="">--Select Country--</option>
+                                @foreach (var country in ViewBag.Countries)
+                                {
+                                    var isSelected = Model.CountryId == country.countryID;
+                                    if (isSelected)
+                                    {
+                                        <option value="@country.countryID" selected>@country.countryName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@country.countryID">@country.countryName</option>
+                                    }
+                                }
+                               
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="StateContainer">
+                        <div class="input-icon">
+                            <i class="fa fa-map"></i>
+
+                            @if (Model.StateId != 0)
+                            {
+                                <select id="State" name="State" class="form-select" required>
+                                    <option value="">--Select State--</option>
+                                    @foreach (var state in ViewBag.states)
+                                    {
+                                        var isSelected = Model.StateId == state.stateID;
+                                        if (isSelected)
+                                        {
+                                            <option value="@state.stateID" selected>@state.stateName</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@state.stateID">@state.stateName</option>
+                                        }
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <input type="text" name="State" id="State" placeholder="Enter State" value="@Model.State" required />
+                            }
+
+                                
+                           
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4" id="StateContainer">
-                    <div class="input-icon">
-                        @* <i class="fa fa-map"></i> *@
-                        <select id="State" name="State" class="form-select" required>
-                            <option value="">--Select State--</option>
-                        </select>
-                    </div>
+
+                <div class="input-icon">
+                    <i class="fa fa-align-left"></i>
+                    <textarea name="Comments" rows="4" placeholder="Project Description" required>@Model.Comments</textarea>
                 </div>
-            </div>
 
-            <div class="input-icon">
-                <i class="fa fa-align-left"></i>
-                <textarea name="Comments" rows="4" placeholder="Project Description" required></textarea>
-            </div>
+                <hr />
 
-            <hr />
+                <h5>Upload Required Documents</h5>
+                <div class="input-icon">
+                    <i class="fa fa-upload"></i>
+                    <input type="file" name="doc" id="fileInput" multiple />
+                </div>
+                <div id="fileErrors" style="color:red"></div>
+                <div class="form-text">Supported: PDF, JPG, PNG. Max 5MB each.</div>
 
-            <h5>Upload Required Documents</h5>
-            <div class="input-icon">
-                <i class="fa fa-upload"></i>
-                <input type="file" name="doc" id="fileInput" multiple />
-            </div>
-            <div id="fileErrors" style="color:red"></div>
-            <div class="form-text">Supported: PDF, JPG, PNG. Max 5MB each.</div>
+                <hr />
+                @if (Model.Documents != null && Model.Documents.Any())
+                {
+                    <h5>Existing Documents</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Uploaded Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var doc in Model.Documents)
+                            {
+                                <tr>
+                                    <td>@doc.Name</td>
+                                    <td>@doc.Type</td>
+                                    <td>@doc.UploadedDate.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <a href="@Url.Action("DownloadDocument", "Citizen", new { id = doc.Id })"
+                                           class="btn btn-sm btn-primary">Download</a>
+                                        <a href="@Url.Action("DeleteDocument", "Citizen", new { id = doc.Id, appId = Model.ApplicationId })"
+                                           class="btn btn-sm btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
 
-            <hr />
-
-            <div class="d-flex justify-content-between">
-                <button type="reset" class="btn btn-secondary">Clear Form</button>
-                <button id="Submit" type="submit" class="btn btn-primary">Submit Application</button>
-            </div>
-        </form>
+                <div class="d-flex justify-content-between">
+                    <button type="reset" class="btn btn-secondary">Clear Form</button>
+                    <button id="submit" type="submit" class="btn btn-primary">Update Application</button>
+                </div>
+            </form>
+        }
     </div>
 </div>
 
@@ -220,14 +385,18 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <script>
     $(document).ready(function () {
+        debugger
+          var IsApply = @(Model == null ? "true" : "false");
         // Load countries on page load
-        $.get('/Account/GetCountries', function (data) {
-            $.each(data, function (i, country) {
-                $('#Country').append('<option value="' + country.countryID + '">' + country.countryName + '</option>');
+        if (IsApply == true) {
+            $.get('/Account/GetCountries', function (data) {
+                $.each(data, function (i, country) {
+                    $('#Country').append('<option value="' + country.countryID + '">' + country.countryName + '</option>');
+                });
             });
-        });
-
-            $('#Country').change(function () {
+        }
+        // Load states when country changes
+    $('#Country').change(function () {
             var countryId = $(this).val();
             var $stateContainer = $('#StateContainer');
             $stateContainer.empty(); // Clear previous state select or textbox
@@ -237,14 +406,27 @@
             $.get('/Account/GetStates?countryId=' + countryId, function (data) {
                 if (data.length > 0) {
                     // If states exist, show dropdown
-                    var $select = $('<select id="State" name="State" class="form-select" required><option value="">--Select State--</option></select>');
+                      var $wrapper = $('<div class="input-icon"><i class="fa fa-map"></i></div>');
+
+                    // Create the select element
+                    var $select = $('<select id="State" name="State" class="form-select" required></select>');
+
+                    // Add default option
+                    $select.append('<option value="">--Select State--</option>');
+
+                    // Loop through data and append options
                     $.each(data, function (i, state) {
                         $select.append('<option value="' + state.stateID + '">' + state.stateName + '</option>');
                     });
-                    $stateContainer.append($select);
+
+                    // Append select to wrapper
+                    $wrapper.append($select);
+
+                    // Append wrapper to container
+                    $stateContainer.append($wrapper);
                 } else {
                     // If no states, show textbox
-                    var $input = $('<input type="text" name="State" id="State" placeholder="Enter State" required/>');
+                    var $input = $(' <div class="input-icon"><i class="fa fa-map"></i><input type="text" name="State" id="State" placeholder="Enter State" required/></div>');
                     $stateContainer.append($input);
                 }
             });
@@ -269,7 +451,7 @@
                 errors.push(`${file.name}: File exceeds 5MB`);
             }
         }
-       
+
         Submit.disabled = errors.length === 1;
         document.getElementById('fileErrors').innerHTML = errors.join('<br>');
     });

@@ -16,11 +16,12 @@ public class ApplicationsFilterViewModel
 
 public class ApplicationViewModel
 {
-    public Int64 ApplicationId { get; set; }
+    public Int64 ApplicationId { get; set; } = 0;
     public string ReferenceNumber { get; set; } = null!;
     public Int64 UserId { get; set; }
 
     public string PermitType { get; set; } = null!;
+    public Int64 PermitTypeID { get; set; } = 0;
 
     public string? Status { get; set; }
 
@@ -38,9 +39,11 @@ public class ApplicationViewModel
     public string? Town { get; set; }
 
     public string State { get; set; } = null!;
-
+    public Int64 StateId { get; set; } = 0;
     public string Country { get; set; } = null!;
+    public Int64 CountryId { get; set; } = 0;
     // Use IFormFile for single or multiple uploads
     public List<IFormFile>? doc { get; set; }
     public string? CitizenName { get; set; }
+    public List<DocumentViewModel>? Documents { get; set; }
 }

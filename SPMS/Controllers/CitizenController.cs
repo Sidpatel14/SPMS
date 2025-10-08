@@ -77,15 +77,67 @@ namespace SPMS.Controllers
 
             return View(model);
         }
-        public IActionResult Apply()
+        public IActionResult Apply(long ApplicationId)
         {
             // Fetch permit types from the database
             var permitTypes = _db.PermitTypes
                      .Select(p => new { p.PermitTypeId, p.Name })
+                     .OrderBy(p => p.PermitTypeId)
                      .ToList<object>();
+
+            ViewBag.Countries = _db.Countries
+               .Select(c => new
+               {
+                   countryID = c.CountryId,
+                   countryName = c.Name
+               })
+               .OrderBy(c => c.countryID)
+               .ToList();
+
+            ViewBag.states = _db.States
+               .Select(s => new
+               {
+                   stateID = s.StateId,
+                   stateName = s.Name
+               })
+               .OrderBy(s => s.stateID)
+               .ToList();
 
             // Pass to view
             ViewBag.PermitTypes = permitTypes;
+            if (ApplicationId > 0)
+            {
+                var existingApplication = GetApplicationDetail(ApplicationId);
+                if (existingApplication != null)
+                {
+                    long stateId = 0;
+                    if (long.TryParse(existingApplication.State?.ToString(), out var parsedState))
+                        stateId = parsedState;
+
+                    long countryId = 0;
+                    if (long.TryParse(existingApplication.Country?.ToString(), out var parsedCountry))
+                        countryId = parsedCountry;
+
+                    var model = new ApplicationViewModel
+                    {
+                        ApplicationId = existingApplication.ApplicationId,
+                        ReferenceNumber = existingApplication.ApplicationNumber,
+                        Address1 = existingApplication.Address1,
+                        Address2 = existingApplication.Address2,
+                        Town = existingApplication.Town,
+                        State = existingApplication.State,
+                        StateId = stateId,
+                        Country = existingApplication.Country,
+                        CountryId= countryId,
+                        Comments = existingApplication.Comment,
+                        PermitType = existingApplication.PermissionType,
+                        PermitTypeID = existingApplication.permitTypeID
+                    };
+
+                    model.Documents = existingApplication.Documents;
+                    return View("Apply", model);
+                }
+            }
             return View();
         }
 
@@ -94,7 +146,7 @@ namespace SPMS.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View("ApplyForPermit", model);
+                return View("Apply", model);
             }
             // 1. Build the documents DataTable
             var dt = new DataTable();
@@ -149,7 +201,92 @@ namespace SPMS.Controllers
                     cmd.Parameters.AddWithValue("@State", model.State);
                     cmd.Parameters.AddWithValue("@Country", model.Country);
                     cmd.Parameters.AddWithValue("@Comments", (object?)model.Comments ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ApplicationId", model.ApplicationId);
+                    var tvpParam = cmd.Parameters.AddWithValue("@Documents", dt);
+                    tvpParam.SqlDbType = SqlDbType.Structured;
+                    tvpParam.TypeName = "dbo.DocumentListType";
 
+                    newApplicationId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                }
+            }
+            // 3. Return result
+            if (model.ApplicationId > 0)
+            {
+                TempData["SuccessMessage"] = "Application updated successfully!";
+                return RedirectToAction("ApplicationDetail", new { id = model.ApplicationId });
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Application submitted successfully!";
+                return RedirectToAction("Dashboard", "Citizen");
+
+            }
+               
+                
+
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Update(ApplicationViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Apply", model);
+            }
+            // 1. Build the documents DataTable
+            var dt = new DataTable();
+            dt.Columns.Add("FileName", typeof(string));
+            dt.Columns.Add("FilePath", typeof(string));
+            dt.Columns.Add("DocumentType", typeof(string));
+
+            if (model.doc != null && model.doc.Any())
+            {
+                var uploadFolder = Path.Combine("wwwroot", "uploads");
+                if (!Directory.Exists(uploadFolder))
+                    Directory.CreateDirectory(uploadFolder);
+
+                var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
+                var maxFileSize = 5 * 1024 * 1024;
+
+                foreach (var file in model.doc)
+                {
+                    if (file.Length <= 0) continue;
+
+                    var ext = Path.GetExtension(file.FileName).ToLower();
+                    if (!allowedExtensions.Contains(ext)) continue;
+                    if (file.Length > maxFileSize) continue;
+
+                    var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+                    var filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    dt.Rows.Add(uniqueFileName, filePath, ext);
+                }
+            }
+            // 2. Call stored procedure
+            Int64 newApplicationId;
+            using (var con = new SqlConnection(connectionString))
+            {
+                await con.OpenAsync();
+                using (var cmd = new SqlCommand("sp_ApplyNewPermit", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@ApplicantID", Convert.ToInt64(HttpContext.Session.GetString("UserID")));
+                    cmd.Parameters.AddWithValue("@PermitTypeID", Convert.ToInt64(model.PermitType));
+                    cmd.Parameters.AddWithValue("@Title", "");
+                    cmd.Parameters.AddWithValue("@Description", "");
+                    cmd.Parameters.AddWithValue("@Address1", model.Address1);
+                    cmd.Parameters.AddWithValue("@Address2", (object?)model.Address2 ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Town", (object?)model.Town ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@State", model.State);
+                    cmd.Parameters.AddWithValue("@Country", model.Country);
+                    cmd.Parameters.AddWithValue("@Comments", (object?)model.Comments ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ApplicationId", model.ApplicationId);
                     var tvpParam = cmd.Parameters.AddWithValue("@Documents", dt);
                     tvpParam.SqlDbType = SqlDbType.Structured;
                     tvpParam.TypeName = "dbo.DocumentListType";
@@ -232,13 +369,19 @@ namespace SPMS.Controllers
                     // --- 1. Application Info ---
                     if (reader.Read())
                     {
+                        model.ApplicationId = applicationId;
                         model.ApplicationNumber = reader["ApplicationNumber"].ToString();
                         model.PermissionType = reader["PermissionType"].ToString();
+                        model.permitTypeID = Convert.ToInt64(reader["PermitTypeID"]);
                         model.Status = reader["Status"].ToString();
                         model.SubmittedDate = Convert.ToDateTime(reader["SubmittedDate"]);
                         model.LastUpdated = Convert.ToDateTime(reader["LastUpdated"]);
-                        model.FullAddress = reader["FullAddress"].ToString();
-                        model.Comment = reader["Comment"].ToString();
+                        model.Address1 = reader["Address1"].ToString();
+                        model.Address2 = reader["Address2"].ToString();
+                        model.Town = reader["Town"].ToString();
+                        model.State = reader["State"].ToString();
+                        model.Country = reader["Country"].ToString();
+                        model.Comment= reader["Comment"].ToString();
                     }
 
                     // --- 2. Documents ---
@@ -275,6 +418,20 @@ namespace SPMS.Controllers
             return model.ApplicationNumber == null ? null : model;
         }
 
+        //public IActionResult DownloadDocument(int id)
+        //{
+        //    var doc = _service.GetDocumentById(id);
+        //    if (doc == null) return NotFound();
+
+        //    var fileBytes = System.IO.File.ReadAllBytes(doc.FilePath);
+        //    return File(fileBytes, "application/octet-stream", doc.FileName);
+        //}
+
+        //public IActionResult DeleteDocument(int id, int appId)
+        //{
+        //    _service.DeleteDocument(id);
+        //    return RedirectToAction("Edit", new { id = appId });
+        //}
 
     }
 }
