@@ -433,5 +433,9 @@ namespace SPMS.Controllers
         //    return RedirectToAction("Edit", new { id = appId });
         //}
 
+        public IActionResult Help()
+        {
+            return View();
+        }
     }
 }

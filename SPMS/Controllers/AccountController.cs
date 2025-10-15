@@ -64,7 +64,7 @@ namespace SPMS.Controllers
                     cmd.Parameters.AddWithValue("@State", model.State);
                     cmd.Parameters.AddWithValue("@Country", model.Country);
                     cmd.Parameters.AddWithValue("@IPAddress", model.Ipaddress ?? (object)DBNull.Value);
-
+                    cmd.Parameters.AddWithValue("@UserId", model.UserId);
                     conn.Open();
                     newUserId = Convert.ToInt64(cmd.ExecuteScalar());
                 }
@@ -286,12 +286,63 @@ namespace SPMS.Controllers
             }
             var user = _db.Users.FirstOrDefault(u => u.UserId == userId);
             if (user == null) return RedirectToAction("Login");
-            return View(user);
+
+            long stateId = 0;
+            if (long.TryParse(user.State?.ToString(), out var parsedState))
+                stateId = parsedState;
+
+            long countryId = 0;
+            if (long.TryParse(user.Country?.ToString(), out var parsedCountry))
+                countryId = parsedCountry;
+
+            ViewBag.Countries = _db.Countries
+               .Select(c => new
+               {
+                   countryID = c.CountryId,
+                   countryName = c.Name
+               })
+               .OrderBy(c => c.countryID)
+               .ToList();
+
+            ViewBag.states = _db.States
+               .Select(s => new
+               {
+                   stateID = s.StateId,
+                   stateName = s.Name
+               })
+               .OrderBy(s => s.stateID)
+               .ToList();
+
+            var model = new UserProfileViewModel
+            {
+                UserId = user.UserId,
+                Title = user.Title,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Password = user.Password,
+                Role = user.Role,
+                Phone = user.Phone,
+                Address1 = user.Address1,
+                Address2 = user.Address2,
+                Town = user.Town,
+                State = user.State,
+                Country = user.Country,
+                CreatedAt = user.CreatedAt,
+                ModifiedAt = user.ModifiedAt,
+                Ipaddress = user.Ipaddress,
+                LastLogin = user.LastLogin,
+                IsActive = user.IsActive,
+                StateId = stateId,
+                CountryId = countryId
+            };
+            
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateProfile(User model)
+        public IActionResult UpdateProfile(UserProfileViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -306,21 +357,96 @@ namespace SPMS.Controllers
                 return View("Profile", model);
             }
 
-            // Update fields
-            user.Title = model.Title;
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-            user.Email = model.Email;
-            user.Phone = model.Phone;
-            user.Address1 = model.Address1;
-            user.Address2 = model.Address2;
-            user.Town = model.Town;
-            user.State = model.State;
-            user.Country = model.Country;
+            long stateId = 0;
+            if (long.TryParse(model.State?.ToString(), out var parsedState))
+                stateId = parsedState;
 
-            _db.SaveChanges();
-            ViewBag.Message = "Profile updated successfully";
-            return View("Profile", user);
+            long countryId = 0;
+            if (long.TryParse(model.Country?.ToString(), out var parsedCountry))
+                countryId = parsedCountry;
+
+            ViewBag.Countries = _db.Countries
+               .Select(c => new
+               {
+                   countryID = c.CountryId,
+                   countryName = c.Name
+               })
+               .OrderBy(c => c.countryID)
+               .ToList();
+
+            ViewBag.states = _db.States
+               .Select(s => new
+               {
+                   stateID = s.StateId,
+                   stateName = s.Name
+               })
+               .OrderBy(s => s.stateID)
+               .ToList();
+            // Update fields
+         
+            model.Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+            string hashedPassword = HashPassword(model.Password);
+
+            try
+            {
+                long newUserId;
+                using (var conn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand("sp_CreateUser", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Title", model.Title);
+                    cmd.Parameters.AddWithValue("@FirstName", model.FirstName);
+                    cmd.Parameters.AddWithValue("@LastName", model.LastName);
+                    cmd.Parameters.AddWithValue("@Email", model.Email);
+                    // Only update password if user entered a new one
+                    if (!string.IsNullOrWhiteSpace(model.Password) && model.Password != "********")
+                    {
+                        cmd.Parameters.AddWithValue("@Password", HashPassword(model.Password));
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@Password", DBNull.Value);
+                    }
+
+                    cmd.Parameters.AddWithValue("@Role", "Citizen");
+                    cmd.Parameters.AddWithValue("@Phone", model.Phone ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Address1", model.Address1);
+                    cmd.Parameters.AddWithValue("@Address2", model.Address2 ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Town", model.Town ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@State", model.State);
+                    cmd.Parameters.AddWithValue("@Country", model.Country);
+                    cmd.Parameters.AddWithValue("@IPAddress", model.Ipaddress ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UserId", model.UserId);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    newUserId = Convert.ToInt64(model.UserId);
+                }
+
+                // log in AuditLogs
+                using (var conn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand("INSERT INTO AuditLogs(UserID, Action, Timestamp, Notes) VALUES(@UserID, @Action, GETDATE(), @Notes)", conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserID", newUserId);
+                    cmd.Parameters.AddWithValue("@Action", "User Updated");
+                    cmd.Parameters.AddWithValue("@Notes", $"User {model.Email} updated with role Citizen");
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+
+                ViewBag.Message = "Profile updated successful";
+                return RedirectToAction("Profile", "Account");
+                //return View("Profile", model);
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("Email already exists"))
+                    ModelState.AddModelError("Email", "This email is already registered.");
+                ViewBag.Error = "This email is already registered.";
+                return View("Profile",model);
+                throw;
+            }
+
         }
 
     }

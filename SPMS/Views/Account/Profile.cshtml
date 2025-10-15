@@ -1,94 +1,95 @@
-﻿@model SPMS.Models.User
+﻿@model UserProfileViewModel
 @{
     ViewBag.Title = "Register";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
 <style>
-    html, body {
-        height: 100%;
-        margin: 0;
+    body {
+        /* background: linear-gradient(135deg, #667eea, #764ba2); */
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea, #764ba2); /* modern gradient */
+        margin: 0;
+        padding: 0;
+    }
+
+    .register-container {
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
+       /*  padding: 50px 15px; */
+        min-height: calc(100vh - 200px); /* allows room for header/footer */
     }
 
-    /* Centered login card */
-    .login-card, .register-card {
+    .register-card {
         width: 100%;
-        max-width: 700px;
-        padding: 40px 35px;
-        border-radius: 15px;
+        max-width: 800px;
         background: #fff;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        padding: 40px;
+        transition: all 0.3s ease;
     }
 
-        .login-card:hover, .register-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
-        }
+    .register-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    }
 
-        /* Heading */
-        .login-card h2, .register-card h2 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 30px;
-            color: #333;
-        }
+    .register-card h2 {
+        text-align: center;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 30px;
+    }
 
-    /* Floating labels */
     .form-group {
         position: relative;
         margin-bottom: 25px;
     }
 
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            transition: all 0.3s ease;
-            background: #fefefe;
-        }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        background: #fefefe;
+        transition: all 0.3s ease;
+    }
 
-            .form-group input:focus, .form-group select:focus {
-                border-color: #667eea;
-                box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
-                outline: none;
-            }
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 8px rgba(102,126,234,0.3);
+        outline: none;
+    }
 
-        .form-group label {
-            position: absolute;
-            top: 12px;
-            left: 15px;
-            color: #aaa;
-            pointer-events: none;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
+    .form-group label {
+        position: absolute;
+        top: 12px;
+        left: 15px;
+        color: #aaa;
+        pointer-events: none;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        background: white;
+    }
 
-        .form-group input:focus + label,
-        .form-group input:not(:placeholder-shown) + label,
-        .form-group select:focus + label,
-        .form-group select:not([value=""]) + label {
-            top: -10px;
-            left: 12px;
-            font-size: 12px;
-            color: #667eea;
-            background: #fff;
-            padding: 0 4px;
-        }
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label,
+    .form-group select:valid + label {
+        top: -10px;
+        left: 12px;
+        font-size: 12px;
+        color: #667eea;
+        padding: 0 4px;
+    }
 
-    /* Submit button */
-    .login-card button, .register-card button {
+    .register-card button {
         width: 100%;
         padding: 12px;
-        border-radius: 10px;
         border: none;
+        border-radius: 10px;
         background: linear-gradient(135deg, #667eea, #764ba2);
         color: #fff;
         font-size: 16px;
@@ -97,200 +98,218 @@
         transition: all 0.3s ease;
     }
 
-        .login-card button:hover, .register-card button:hover {
-            background: linear-gradient(135deg, #764ba2, #667eea);
-            transform: translateY(-2px);
-        }
-
-    /* Links */
-    .login-card .text-center, .register-card .text-center {
-        margin-top: 20px;
+    .register-card button:hover {
+        background: linear-gradient(135deg, #764ba2, #667eea);
+        transform: translateY(-2px);
     }
 
-        .login-card .text-center a, .register-card .text-center a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-            .login-card .text-center a:hover, .register-card .text-center a:hover {
-                text-decoration: underline;
-            }
-
-    /* Alert */
     .alert {
         padding: 12px 15px;
         border-radius: 10px;
         margin-bottom: 20px;
         font-size: 14px;
+    }
+
+    .alert-success {
+        background: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+
+    .alert-danger {
         background: #f8d7da;
         color: #842029;
         border: 1px solid #f5c2c7;
     }
 
-    /* Responsive */
+    .register-card h3 {
+        margin-top: 40px;
+        text-align: center;
+        color: #333;
+    }
+
     @@media (max-width: 768px) {
-        .login-card, .register-card {
-            padding: 30px 20px;
+        .register-card {
+            padding: 25px;
         }
     }
 </style>
-<div class="register-card">
-    <h2>User Profile</h2>
 
-    @if (ViewBag.Message != null)
-    {
-        <div class="alert alert-success">@ViewBag.Message</div>
-    }
-    else if (ViewBag.Error != null)
-    {
-        <div class="alert alert-danger">@ViewBag.Error</div>
-    }
+<div class="register-container">
+    <div class="register-card">
+        <h2>User Profile</h2>
 
-    @using (Html.BeginForm("UpdateProfile", "Account", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        <div class="row">
-            <div class="col-md-2 form-group">
-                <select name="Title" class="form-control" required>
-                    <option value="">Title</option>
-                    <option value="Mr" selected="@(Model?.Title == "Mr" ? "selected" : null)">Mr</option>
-                    <option value="Mrs" selected="@(Model?.Title == "Mrs" ? "selected" : null)">Mrs</option>
-                    <option value="Miss" selected="@(Model?.Title == "Miss" ? "selected" : null)">Miss</option>
-                </select>
-                <label>Title</label>
-            </div>
-            <div class="col-md-5 form-group">
-                <input type="text" name="FirstName" value="@(Model?.FirstName ?? string.Empty)" required placeholder=" " />
-                <label>First Name</label>
-            </div>
-            <div class="col-md-5 form-group">
-                <input type="text" name="LastName" value="@(Model?.LastName ?? string.Empty)" required placeholder=" " />
-                <label>Last Name</label>
-            </div>
-        </div>
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-success">@ViewBag.Message</div>
+        }
+        else if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
 
-        <div class="row">
-            <div class="col-md-6 form-group">
-                <input type="email" name="Email" value="@(Model?.Email ?? string.Empty)" required placeholder=" " />
-                <label>Email</label>
+        @using (Html.BeginForm("UpdateProfile", "Account", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="UserId" id="UserId" value="@Model.UserId" />
+            <input type="hidden" name="CountryId" id="CountryId" value="@Model.CountryId" />
+            <input type="hidden" name="StateId" id="StateId" value="@Model.StateId" />
+            <div class="row">
+                <div class="col-md-2 form-group">
+                    <select name="Title" class="form-control" required>
+                        <option value="">Title</option>
+                        <option value="Mr" selected="@(Model?.Title == "Mr" ? "selected" : null)">Mr</option>
+                        <option value="Mrs" selected="@(Model?.Title == "Mrs" ? "selected" : null)">Mrs</option>
+                        <option value="Miss" selected="@(Model?.Title == "Miss" ? "selected" : null)">Miss</option>
+                    </select>
+                    <label>Title</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name="FirstName" value="@(Model?.FirstName ?? string.Empty)" required placeholder=" " />
+                    <label>First Name</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name="LastName" value="@(Model?.LastName ?? string.Empty)" required placeholder=" " />
+                    <label>Last Name</label>
+                </div>
             </div>
-            <div class="col-md-6 form-group">
-                <input type="text" name="Phone" value="@(Model?.Phone ?? string.Empty)" placeholder=" " />
-                <label>Phone</label>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 form-group">
-                <input type="text" name="Address1" value="@(Model?.Address1 ?? string.Empty)" required placeholder=" " />
-                <label>Address 1</label>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <input type="email" id="Email" name="Email" value="@(Model?.Email ?? string.Empty)" required placeholder=" " />
+                    <label>Email</label>
+                    <small id="emailWarning" style="color:red;display:none;">Email already registered.</small>
+                </div>
+                <div class="col-md-4 form-group">
+                    <input type="password" name="Password" value="********" readonly onclick="this.removeAttribute('readonly'); this.value='';" placeholder=" ">
+                    <label>Password</label>
+                    <small class="text-muted">Leave blank to keep current password.</small>
+                    
+                </div>
+                <div class="col-md-4 form-group">
+                    <input type="text" name="Phone" value="@(Model?.Phone ?? string.Empty)" placeholder=" " />
+                    <label>Phone</label>
+                </div>
             </div>
-            <div class="col-md-6 form-group">
-                <input type="text" name="Address2" value="@(Model?.Address2 ?? string.Empty)" placeholder=" " />
-                <label>Address 2</label>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-4 form-group">
-                <input type="text" name="Town" value="@(Model?.Town ?? string.Empty)" placeholder=" " />
-                <label>Town</label>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <input type="text" name="Address1" value="@(Model?.Address1 ?? string.Empty)" required placeholder=" " />
+                    <label>Address 1</label>
+                </div>
+                <div class="col-md-6 form-group">
+                    <input type="text" name="Address2" value="@(Model?.Address2 ?? string.Empty)" placeholder=" " />
+                    <label>Address 2</label>
+                </div>
             </div>
-            <div class="col-md-4 form-group">
-                <input type="text" name="State" value="@(Model?.State ?? string.Empty)" placeholder=" " />
-                <label>State</label>
-            </div>
-            <div class="col-md-4 form-group">
-                <input type="text" name="Country" value="@(Model?.Country ?? string.Empty)" placeholder=" " />
-                <label>Country</label>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 form-group">
-                <input type="text" name="Role" value="@(Model?.Role ?? string.Empty)" readonly placeholder=" " />
-                <label>Role</label>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <input type="text" name="Town" value="@(Model?.Town ?? string.Empty)" placeholder=" " />
+                    <label>Town</label>
+                </div>
+               
+                <div class="col-md-4 form-group" id="CountryContainer">
+                    <select id="Country" name="Country" class="form-select" required>
+                        <option value="">--Select Country--</option>
+                        @foreach (var country in ViewBag.Countries)
+                        {
+                            var isSelected = Model.CountryId == country.countryID;
+                            if (isSelected)
+                            {
+                                <option value="@country.countryID" selected>@country.countryName</option>
+                            }
+                            else
+                            {
+                                <option value="@country.countryID">@country.countryName</option>
+                            }
+                        }
+
+                    </select>
+                    <label>Country</label>
+                </div>
+                <div class="col-md-4 form-group" id="StateContainer">
+
+                    @if (Model.StateId != 0)
+                    {
+                        <select id="State" name="State" class="form-select" required>
+                            <option value="">--Select State--</option>
+                            @foreach (var state in ViewBag.states)
+                            {
+                                var isSelected = Model.StateId == state.stateID;
+                                if (isSelected)
+                                {
+                                    <option value="@state.stateID" selected>@state.stateName</option>
+                                }
+                                else
+                                {
+                                    <option value="@state.stateID">@state.stateName</option>
+                                }
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <input type="text" name="State" id="State" placeholder="Enter State" value="@(Model?.State ?? string.Empty)" required />
+                    }
+                    <label>State</label>
+                </div>
             </div>
-        </div>
 
-        <button type="submit">Save Changes</button>
-    }
-
-    <h3 class="mt-3">Change Password</h3>
-    @using (Html.BeginForm("ChangePassword", "Account", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        <div class="row">
-            <div class="col-md-4 form-group">
-                <input type="password" name="CurrentPassword" required placeholder=" " />
-                <label>Current Password</label>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <input type="text" name="Role" value="@(Model?.Role ?? string.Empty)" readonly placeholder=" " />
+                    <label>Role</label>
+                </div>
             </div>
-            <div class="col-md-4 form-group">
-                <input type="password" name="NewPassword" required placeholder=" " />
-                <label>New Password</label>
-            </div>
-            <div class="col-md-4 form-group">
-                <input type="password" name="ConfirmPassword" required placeholder=" " />
-                <label>Confirm Password</label>
-            </div>
-        </div>
-        <button type="submit">Update Password</button>
 
+            <button type="submit">Save Changes</button>
+        }
 
-    }
-
+    </div>
 </div>
 
 <script>
     $(document).ready(function () {
-        // Load countries on page load
-        $.get('/Account/GetCountries', function (data) {
-            $('#Country').append('<option value="">--Select Country--</option>');
-            $.each(data, function (i, country) {
-                $('#Country').append('<option value="' + country.countryID + '">' + country.countryName + '</option>');
-            });
-        });
 
-            $('#Country').change(function () {
+        // Load states
+        $('#Country').change(function () {
             var countryId = $(this).val();
             var $stateContainer = $('#StateContainer');
-            $stateContainer.empty(); // Clear previous state select or textbox
+            $stateContainer.empty();
 
             if (!countryId) return;
 
             $.get('/Account/GetStates?countryId=' + countryId, function (data) {
                 if (data.length > 0) {
-                    // If states exist, show dropdown
-                    var $select = $('<select id="State" name="State" class="form-control" required><option value="">--Select State--</option></select>');
+                    var $select = $('<select id="State" name="State" class="form-select" required><option value="">--Select State--</option></select>');
                     $.each(data, function (i, state) {
-                        $select.append('<option value="' + state.stateName + '">' + state.stateName + '</option>');
+                        $select.append('<option value="' + state.stateID + '">' + state.stateName + '</option>');
                     });
                     $stateContainer.append($select);
+                    $stateContainer.append('<label>State</label>');
                 } else {
-                    // If no states, show textbox
                     var $input = $('<input type="text" name="State" id="State" placeholder="Enter State" required/>');
                     $stateContainer.append($input);
+                    $stateContainer.append('<label>State</label>');
                 }
             });
         });
 
-        $('#Email').on('blur', function () {
-            debugger
-        var email = $(this).val();
-        if (email) {
-            $.get('/Account/CheckEmail?email=' + encodeURIComponent(email), function (exists) {
-                if (exists === true) {
-                    alert("Email already registered. Please use another one.");
-                     $('#Email').val('');
-                    $('#Email').focus();
 
-                }
-            });
-        }
-    });
+        // Email check
+        // $('#Email').on('blur', function () {
+        //     var email = $(this).val();
+        //     if (email) {
+        //         $.get('/Account/CheckEmail?email=' + encodeURIComponent(email), function (exists) {
+        //             if (exists === true) {
+        //                 $('#emailWarning').show();
+        //                 $('#Email').focus();
+        //             } else {
+        //                 $('#emailWarning').hide();
+        //             }
+        //         });
+        //     }
+        // });
     });
 </script>
-
-
-
